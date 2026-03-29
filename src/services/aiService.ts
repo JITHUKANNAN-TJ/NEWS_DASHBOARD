@@ -168,3 +168,16 @@ export const predictStoryArc = async (arcTitle: string, status: string, players:
     return { prediction: "Forecast Fragmented.", probability: 50 };
   }
 };
+
+export const adaptCulturally = async (text: string, language: string) => {
+  if (!GEMINI_API_KEY) throw new Error("Missing Gemini API Key");
+  const model = getGeminiModel();
+  const prompt = `Adapt to ${language}: "${text}". Return JSON: {"translation": "...", "analogy": "..."}`;
+  try {
+    const result = await model.generateContent(prompt);
+    const textRes = result.response.text().replace(/```json|```/g, "");
+    return JSON.parse(textRes);
+  } catch (e) {
+    return { translation: text, analogy: "Neural Sync Fragmented." };
+  }
+};
