@@ -169,6 +169,7 @@ const App = () => {
                   stories={stories}
                   persona={persona}
                   onNotify={showToast}
+                  onAnalyze={setSelectedStory}
                 />
               )}
               {activeTab === 'storyarc' && (
