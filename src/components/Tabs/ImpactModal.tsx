@@ -15,43 +15,43 @@ const ImpactModal: React.FC<ImpactModalProps> = ({ story, isOpen, onClose }) => 
   return (
     <AnimatePresence>
       {isOpen && (
-        <>
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={onClose}
             style={{
               position: 'fixed',
               inset: 0,
-              backgroundColor: 'rgba(0,0,0,0.8)',
-              backdropFilter: 'blur(15px)',
+              backgroundColor: 'rgba(0,0,0,0.85)',
+              backdropFilter: 'blur(20px)',
               zIndex: 9999,
-              cursor: 'pointer'
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '20px',
+              cursor: 'default'
             }}
-          />
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 30 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            style={{
-              position: 'fixed',
-              left: '50%',
-              top: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: 'min(92vw, 900px)',
-              maxHeight: '90vh',
-              overflowY: 'auto',
-              backgroundColor: 'rgba(15, 18, 24, 0.98)',
-              border: '1px solid var(--border-subtle)',
-              borderRadius: '3rem',
-              zIndex: 10000,
-              padding: 'clamp(1.5rem, 5vw, 4rem)',
-              boxShadow: '0 50px 150px -20px rgba(0,0,0,0.8)',
-              msOverflowStyle: 'none',
-              scrollbarWidth: 'none'
-            }}
+            onClick={onClose}
           >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 30 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                width: 'min(92vw, 940px)',
+                maxHeight: 'min(90vh, 1200px)',
+                overflowY: 'auto',
+                backgroundColor: 'rgba(15, 18, 24, 0.98)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: '3rem',
+                padding: 'clamp(1.5rem, 5vw, 4rem)',
+                boxShadow: '0 50px 150px -20px rgba(0,0,0,0.8)',
+                position: 'relative',
+                msOverflowStyle: 'none',
+                scrollbarWidth: 'none'
+              }}
+            >
             {/* Modal Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '3rem' }}>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'center' }}>
@@ -162,7 +162,7 @@ const ImpactModal: React.FC<ImpactModalProps> = ({ story, isOpen, onClose }) => 
               </button>
             </div>
           </motion.div>
-        </>
+        </motion.div>
       )}
     </AnimatePresence>
   );
