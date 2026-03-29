@@ -31,10 +31,10 @@ const StoryArcTracker: React.FC<StoryArcTrackerProps> = ({ onNotify }) => {
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -30 }}
-      style={{ display: 'grid', gridTemplateColumns: '380px 1fr', gap: '2.5rem', height: '100%' }}
+      style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 350px), 1fr))', gap: '2.5rem', height: '100%' }}
     >
       {/* Sidebar: Intelligent Arc Selection */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', minWidth: 0 }}>
         <div style={{ padding: '0 0.5rem' }}>
             <h2 className="heading" style={{ fontSize: '1.85rem', fontWeight: '900', color: 'var(--text-main)', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
               <BarChart3 size={28} style={{ color: 'var(--primary)' }} /> Active Arcs
@@ -68,7 +68,8 @@ const StoryArcTracker: React.FC<StoryArcTrackerProps> = ({ onNotify }) => {
                         color: arc.sentiment === 'bullish' ? '#10b981' : 'var(--text-muted)',
                         padding: '0.25rem 0.6rem',
                         borderRadius: '0.5rem',
-                        letterSpacing: '0.05em'
+                        letterSpacing: '0.05em',
+                        flexShrink: 0
                     }}>
                         {arc.status.toUpperCase()}
                     </div>
@@ -94,15 +95,15 @@ const StoryArcTracker: React.FC<StoryArcTrackerProps> = ({ onNotify }) => {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
             className="glass-panel"
-            style={{ padding: '3.5rem', borderRadius: '3rem', border: '1px solid var(--border-subtle)', backgroundColor: 'rgba(18, 21, 28, 0.2)' }}
+            style={{ padding: 'clamp(1.5rem, 3vw, 3.5rem)', borderRadius: '3rem', border: '1px solid var(--border-subtle)', backgroundColor: 'rgba(18, 21, 28, 0.2)', minWidth: 0 }}
           >
             {/* Arc Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4rem' }}>
-                <div style={{ maxWidth: '70%' }}>
+            <div className="stack-mobile" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4rem' }}>
+                <div style={{ maxWidth: '100%' }}>
                     <motion.div 
                         initial={{ opacity: 0 }} 
                         animate={{ opacity: 1 }} 
-                        style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.25rem' }}
+                        style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}
                     >
                         <span style={{ padding: '0.4rem 0.8rem', borderRadius: '0.5rem', background: 'var(--investor-bg)', color: 'var(--investor-primary)', fontWeight: '900', fontSize: '0.75rem', letterSpacing: '0.1em' }}>
                             NARRATIVE ARC 2026-A
@@ -111,15 +112,15 @@ const StoryArcTracker: React.FC<StoryArcTrackerProps> = ({ onNotify }) => {
                             <Calendar size={14} /> ACTIVE SINCE JAN 12.
                         </div>
                     </motion.div>
-                    <h2 className="heading" style={{ fontSize: '3.5rem', fontWeight: '900', color: 'white', lineHeight: '1', letterSpacing: '-0.04em' }}>
+                    <h2 className="heading" style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: '900', color: 'white', lineHeight: '1.1', letterSpacing: '-0.04em' }}>
                         {activeArc.title}
                     </h2>
                 </div>
                 <div style={{ display: 'flex', gap: '1rem' }}>
-                    <button className="glass-card" style={{ padding: '1rem', borderRadius: '1.25rem', border: '1px solid var(--border-subtle)', cursor: 'pointer', background: 'rgba(255,255,255,0.03)' }}>
+                    <button className="glass-card" style={{ padding: '0.75rem', borderRadius: '1.25rem', border: '1px solid var(--border-subtle)', cursor: 'pointer', background: 'rgba(255,255,255,0.03)' }}>
                         <Share2 size={24} />
                     </button>
-                    <button className="glass-card" style={{ padding: '1rem', borderRadius: '1.25rem', border: '1px solid var(--border-subtle)', cursor: 'pointer', background: 'rgba(255,255,255,0.03)' }}>
+                    <button className="glass-card" style={{ padding: '0.75rem', borderRadius: '1.25rem', border: '1px solid var(--border-subtle)', cursor: 'pointer', background: 'rgba(255,255,255,0.03)' }}>
                         <Info size={24} />
                     </button>
                 </div>
@@ -127,16 +128,16 @@ const StoryArcTracker: React.FC<StoryArcTrackerProps> = ({ onNotify }) => {
 
             {/* Cinematic Timeline & Sentiment Wave */}
             <section style={{ marginBottom: '5rem', position: 'relative' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem', flexWrap: 'wrap', gap: '1rem' }}>
                     <h4 style={{ fontWeight: '900', color: 'white', textTransform: 'uppercase', letterSpacing: '0.1em', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                         <TrendingUp size={18} style={{ color: 'var(--primary)' }} /> Visual Narrative Timeline
                     </h4>
                     <div style={{ fontSize: '0.85rem', fontWeight: '800', color: 'var(--text-dim)' }}>PROBABILITY ACCURACY: 92%</div>
                 </div>
 
-                <div style={{ position: 'relative', height: '180px', display: 'flex', alignItems: 'flex-end', padding: '0 2rem' }}>
+                <div style={{ position: 'relative', height: '180px', display: 'flex', alignItems: 'flex-end', overflowX: 'auto', paddingBottom: '1rem' }}>
                     {/* Sentiment Wave SVG */}
-                    <svg style={{ position: 'absolute', bottom: '60px', left: 0, width: '100%', height: '100px', zIndex: 0 }}>
+                    <svg style={{ position: 'absolute', bottom: '60px', left: 0, width: '1200px', height: '100px', zIndex: 0 }}>
                         <motion.path 
                             initial={{ pathLength: 0 }}
                             animate={{ pathLength: 1 }}
@@ -149,9 +150,9 @@ const StoryArcTracker: React.FC<StoryArcTrackerProps> = ({ onNotify }) => {
                         />
                     </svg>
 
-                    <div style={{ position: 'absolute', bottom: '60px', left: 0, right: 0, height: '1px', background: 'rgba(255,255,255,0.1)', zIndex: 0 }} />
+                    <div style={{ position: 'absolute', bottom: '60px', left: 0, width: '1200px', height: '1px', background: 'rgba(255,255,255,0.1)', zIndex: 0 }} />
                     
-                    <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', position: 'relative', zIndex: 1 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', minWidth: '1200px', position: 'relative', zIndex: 1, padding: '0 2rem' }}>
                         {activeArc.timeline.map((event, idx) => (
                             <motion.div 
                                 key={idx} 
@@ -180,13 +181,13 @@ const StoryArcTracker: React.FC<StoryArcTrackerProps> = ({ onNotify }) => {
             </section>
 
             {/* Intelligence Layers Section */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '2.5rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: '2.5rem' }}>
                 {/* Key Players Layer */}
-                <div className="glass-card" style={{ padding: '2.5rem', borderRadius: '2.5rem', backgroundColor: 'rgba(255,255,255,0.01)' }}>
+                <div className="glass-card" style={{ padding: 'clamp(1.5rem, 2vw, 2.5rem)', borderRadius: '2.5rem', backgroundColor: 'rgba(255,255,255,0.01)' }}>
                     <h4 style={{ fontWeight: '900', color: 'white', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '1rem', textTransform: 'uppercase', letterSpacing: '0.1em', fontSize: '0.85rem' }}>
                         <Users size={20} style={{ color: 'var(--student-primary)' }} /> Core Influence Node
                     </h4>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.5rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1.5rem' }}>
                         {activeArc.players.map((player, i) => (
                             <motion.div 
                                 key={player} 
@@ -204,16 +205,16 @@ const StoryArcTracker: React.FC<StoryArcTrackerProps> = ({ onNotify }) => {
                                 }}
                             >
                                 <div style={{ 
-                                    width: '64px', height: '64px', borderRadius: '50%', 
+                                    width: '56px', height: '56px', borderRadius: '50%', 
                                     background: i % 2 === 0 ? 'var(--student-gradient)' : 'var(--founder-gradient)', 
                                     display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                                    color: 'white', fontSize: '1.5rem', fontWeight: '900', boxShadow: 'var(--shadow-md)'
+                                    color: 'white', fontSize: '1.25rem', fontWeight: '900', boxShadow: 'var(--shadow-md)'
                                 }}>
                                     {player[0]}
                                 </div>
                                 <div>
                                     <div style={{ fontWeight: '800', fontSize: '1.1rem', color: 'white' }}>{player}</div>
-                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', fontWeight: '700', marginTop: '0.25rem' }}>Primary Structural Catalyst</div>
+                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', fontWeight: '700', marginTop: '0.25rem' }}>Primary Structural Catalyst</div>
                                 </div>
                             </motion.div>
                         ))}
@@ -222,7 +223,7 @@ const StoryArcTracker: React.FC<StoryArcTrackerProps> = ({ onNotify }) => {
 
                 {/* Perspective & Forecast Layer */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                    <div className="glass-card" style={{ padding: '2rem', borderRadius: '2rem', background: 'rgba(245, 158, 11, 0.05)', border: '1px solid rgba(245, 158, 11, 0.1)' }}>
+                    <div className="glass-card" style={{ padding: '1.75rem', borderRadius: '2rem', background: 'rgba(245, 158, 11, 0.05)', border: '1px solid rgba(245, 158, 11, 0.1)' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', color: '#f59e0b' }}>
                             <AlertTriangle size={20} />
                             <span style={{ fontWeight: '900', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Contrarian Perspective</span>
@@ -233,22 +234,22 @@ const StoryArcTracker: React.FC<StoryArcTrackerProps> = ({ onNotify }) => {
                     </div>
 
                     <div className="glass-card" style={{ padding: '2rem', borderRadius: '2rem', background: 'var(--investor-bg)', border: '1px solid var(--investor-light)', flex: 1 }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.5rem' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--investor-primary)' }}>
                                 <Activity size={20} />
                                 <span style={{ fontWeight: '900', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Market Impact Vector</span>
                             </div>
-                            <div style={{ fontSize: '1.25rem', fontWeight: '900', color: 'var(--investor-primary)' }}>HIGH</div>
+                            <div style={{ fontSize: '1.1rem', fontWeight: '900', color: 'var(--investor-primary)' }}>HIGH</div>
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem', fontWeight: '800', color: 'var(--text-dim)' }}>
+                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem', fontWeight: '800', color: 'var(--text-dim)', flexWrap: 'wrap', gap: '0.5rem' }}>
                                 <span>Narrative Saturation</span>
                                 <span>68%</span>
                              </div>
                              <div style={{ height: '8px', width: '100%', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.05)' }}>
                                 <motion.div initial={{ width: 0 }} animate={{ width: '68%' }} style={{ height: '100%', background: 'var(--investor-primary)', borderRadius: '4px', boxShadow: '0 0 10px var(--investor-primary)' }} />
                              </div>
-                             <div style={{ padding: '1rem', borderRadius: '1rem', backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-subtle)' }}>
+                             <div style={{ padding: '1.25rem', borderRadius: '1.5rem', backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-subtle)' }}>
                                 <div style={{ color: 'var(--investor-primary)', fontWeight: '900', fontSize: '0.75rem', marginBottom: '0.4rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                     <Target size={14} /> WHAT TO WATCH NEXT
                                 </div>

@@ -42,6 +42,11 @@
   --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
   --shadow-md: 0 12px 24px -6px rgba(0,0,0,0.3);
   --shadow-lg: 0 20px 40px -12px rgba(0,0,0,0.5);
+  /* Responsive Variables */
+  --main-padding: 3rem;
+  --sidebar-width: 300px;
+  --sidebar-collapsed-width: 96px;
+  --header-height: 100px;
 }
 
 body {
@@ -51,7 +56,23 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--bg-main);
   color: var(--text-main);
-  overflow: hidden;
+  /* Remove overflow: hidden to allow scrolling on high zoom */
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+@media (max-width: 1024px) {
+  :root {
+    --main-padding: 2rem;
+    --sidebar-width: 100%; /* Drawer mode */
+    --header-height: 80px;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --main-padding: 1.25rem;
+  }
 }
 
 h1, h2, h3, h4, .heading {
@@ -125,6 +146,33 @@ h1, h2, h3, h4, .heading {
 .pulse {
   animation: pulse-gentle 3s infinite ease-in-out;
 }
+
+/* Responsive Grid Utilities */
+.grid-responsive {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 350px), 1fr));
+  gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .grid-responsive {
+    grid-template-columns: 1fr;
+  }
+  
+  .hide-mobile {
+    display: none !important;
+  }
+
+  .stack-mobile {
+    flex-direction: column !important;
+    gap: 1.5rem !important;
+  }
+}
+
+/* Fluid Heading Sizes */
+h1 { font-size: clamp(2rem, 5vw, 3.5rem); }
+h2 { font-size: clamp(1.5rem, 4vw, 2.75rem); }
+h3 { font-size: clamp(1.25rem, 3vw, 1.75rem); }
 
 /* Layout Helpers */
 .flex-center {

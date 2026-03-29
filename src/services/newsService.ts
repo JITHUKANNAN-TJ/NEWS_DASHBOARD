@@ -32,7 +32,10 @@ export const fetchNewsByPersona = async (persona: Persona): Promise<Story[]> => 
       title: article.title,
       category: persona.charAt(0).toUpperCase() + persona.slice(1),
       sentiment: analyzeSentiment(article.title),
-      relevance: Math.floor(Math.random() * (99 - 85 + 1)) + 85 // Mock relevance for now
+      relevance: Math.floor(Math.random() * (99 - 85 + 1)) + 85, // Mock relevance for now
+      urlToImage: article.urlToImage,
+      description: article.description,
+      source: article.source
     }));
   } catch (error) {
     console.error('Failed to fetch live news:', error);

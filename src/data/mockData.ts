@@ -28,19 +28,19 @@ export const PERSONA_CONFIG: Record<Persona, PersonaConfig> = {
 
 export const PERSONA_STORIES: Record<Persona, Story[]> = {
   investor: [
-    { id: 1, title: 'RIL Q3 Earnings Beat Expectations', category: 'Markets', sentiment: 'positive', relevance: 95 },
-    { id: 2, title: 'Nifty 50 Reaches New All-Time High', category: 'Index', sentiment: 'positive', relevance: 92 },
-    { id: 3, title: 'Tech Sector Volatility: What It Means', category: 'Analysis', sentiment: 'neutral', relevance: 88 },
+    { id: 1, title: 'RIL Q3 Earnings Beat Expectations', category: 'Markets', sentiment: 'positive', relevance: 95, source: { name: 'ET Intelligence' } },
+    { id: 2, title: 'Nifty 50 Reaches New All-Time High', category: 'Index', sentiment: 'positive', relevance: 92, source: { name: 'ET Markets' } },
+    { id: 3, title: 'Tech Sector Volatility: What It Means', category: 'Analysis', sentiment: 'neutral', relevance: 88, source: { name: 'Institutional Note' } },
   ],
   founder: [
-    { id: 1, title: '$2B Funding Round for Indian AI Startup', category: 'Funding', sentiment: 'positive', relevance: 98 },
-    { id: 2, title: 'SoftBank Backs 5 New Startups This Month', category: 'Funding', sentiment: 'positive', relevance: 94 },
-    { id: 3, title: 'Competitor Launches New Product Line', category: 'Competition', sentiment: 'warning', relevance: 91 },
+    { id: 1, title: '$2B Funding Round for Indian AI Startup', category: 'Funding', sentiment: 'positive', relevance: 98, source: { name: 'Entrackr' } },
+    { id: 2, title: 'SoftBank Backs 5 New Startups This Month', category: 'Funding', sentiment: 'positive', relevance: 94, source: { name: 'Venture Pulse' } },
+    { id: 3, title: 'Competitor Launches New Product Line', category: 'Competition', sentiment: 'warning', relevance: 91, source: { name: 'Scout AI' } },
   ],
   student: [
-    { id: 1, title: 'What is Quantitative Easing? A Starter Guide', category: 'Explainer', sentiment: 'neutral', relevance: 100 },
-    { id: 2, title: 'Understanding Cryptocurrency Regulation', category: 'Explainer', sentiment: 'neutral', relevance: 96 },
-    { id: 3, title: 'ESG Investing Explained in 5 Minutes', category: 'Explainer', sentiment: 'neutral', relevance: 94 },
+    { id: 1, title: 'What is Quantitative Easing? A Starter Guide', category: 'Explainer', sentiment: 'neutral', relevance: 100, source: { name: 'Finance 101' } },
+    { id: 2, title: 'Understanding Cryptocurrency Regulation', category: 'Explainer', sentiment: 'neutral', relevance: 96, source: { name: 'Regulatory Watch' } },
+    { id: 3, title: 'ESG Investing Explained in 5 Minutes', category: 'Explainer', sentiment: 'neutral', relevance: 94, source: { name: 'Green Finance' } },
   ]
 };
 

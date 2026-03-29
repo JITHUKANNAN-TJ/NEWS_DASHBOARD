@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { 
   TrendingUp, Brain, BarChart3, Video, Globe, 
   Menu, X, User, ChevronRight, Settings, LogOut,
@@ -12,9 +12,10 @@ interface SidebarProps {
   setIsOpen: (isOpen: boolean) => void;
   activeTab: string;
   setActiveTab: (tab: string) => void;
+  isMobile: boolean;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen, activeTab, setActiveTab }) => {
+const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen, activeTab, setActiveTab, isMobile }) => {
   const menuItems = [
     { id: 'home', icon: TrendingUp, label: 'My ET Feed' },
     { id: 'navigator', icon: Brain, label: 'News Navigator' },
@@ -23,19 +24,34 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen, activeTab, setActi
     { id: 'vernacular', icon: Globe, label: 'Vernacular' }
   ];
 
+  const sidebarVariants: Variants = {
+    open: { 
+      width: isMobile ? 'min(85vw, 320px)' : '300px',
+      x: 0,
+      transition: { type: 'spring', damping: 25, stiffness: 120 }
+    },
+    closed: { 
+      width: isMobile ? 0 : '96px',
+      x: isMobile ? '-100%' : 0,
+      transition: { type: 'spring', damping: 25, stiffness: 120 }
+    }
+  };
+
   return (
     <motion.div 
       initial={false}
-      animate={{ width: isOpen ? '300px' : '96px' }}
-      transition={{ type: 'spring', damping: 25, stiffness: 120 }}
+      animate={isOpen ? "open" : "closed"}
+      variants={sidebarVariants}
       style={{
         display: 'flex',
         flexDirection: 'column',
         backgroundColor: 'var(--bg-surface)',
         borderRight: '1px solid var(--border-subtle)',
         height: '100vh',
-        boxShadow: '10px 0 40px rgba(0,0,0,0.5)',
-        position: 'relative',
+        boxShadow: isOpen ? '10px 0 40px rgba(0,0,0,0.5)' : 'none',
+        position: isMobile ? 'fixed' : 'relative',
+        left: 0,
+        top: 0,
         zIndex: 100,
         overflow: 'hidden'
       }}
@@ -47,10 +63,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen, activeTab, setActi
         alignItems: 'center',
         justifyContent: 'space-between',
         height: '100px',
-        borderBottom: '1px solid var(--border-subtle)'
+        borderBottom: '1px solid var(--border-subtle)',
+        minWidth: '280px'
       }}>
         <motion.div 
-          animate={{ opacity: isOpen ? 1 : 0, scale: isOpen ? 1 : 0.8 }}
+          animate={{ opacity: (isOpen || !isMobile) ? 1 : 0 }}
           style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}
         >
           <div style={{
@@ -69,29 +86,34 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen, activeTab, setActi
           <h1 className="heading" style={{ fontWeight: '900', fontSize: '1.75rem', color: 'white', letterSpacing: '-0.05em' }}>ET 2026</h1>
         </motion.div>
         
-        <motion.button
-          onClick={() => setIsOpen(!isOpen)}
-          whileHover={{ scale: 1.1, backgroundColor: 'rgba(255,255,255,0.05)' }}
-          whileTap={{ scale: 0.9 }}
-          style={{
-            padding: '0.6rem',
-            backgroundColor: 'transparent',
-            border: '1px solid var(--border-subtle)',
-            borderRadius: '0.75rem',
-            cursor: 'pointer',
-            color: 'var(--text-muted)'
-          }}
-        >
-          {isOpen ? <X size={20} /> : <Menu size={20} />}
-        </motion.button>
+        {isMobile && (
+          <motion.button
+            onClick={() => setIsOpen(false)}
+            whileHover={{ scale: 1.1, backgroundColor: 'rgba(255,255,255,0.05)' }}
+            whileTap={{ scale: 0.9 }}
+            style={{
+              padding: '0.6rem',
+              backgroundColor: 'transparent',
+              border: '1px solid var(--border-subtle)',
+              borderRadius: '0.75rem',
+              cursor: 'pointer',
+              color: 'var(--text-muted)'
+            }}
+          >
+            <X size={20} />
+          </motion.button>
+        )}
       </div>
 
       {/* Primary Navigation */}
-      <nav style={{ flex: 1, padding: '2rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+      <nav style={{ flex: 1, padding: '2rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', minWidth: '280px' }}>
         {menuItems.map((item) => (
           <motion.button
             key={item.id}
-            onClick={() => setActiveTab(item.id)}
+            onClick={() => {
+              setActiveTab(item.id);
+              if (isMobile) setIsOpen(false);
+            }}
             whileHover={{ x: 6, backgroundColor: activeTab === item.id ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.02)' }}
             whileTap={{ scale: 0.98 }}
             style={{
@@ -116,7 +138,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen, activeTab, setActi
             }} />
             
             <AnimatePresence>
-              {isOpen && (
+              {(isOpen || (!isMobile && isOpen)) && (
                 <motion.span 
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -147,7 +169,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen, activeTab, setActi
       </nav>
 
       {/* System Status / User Section */}
-      <div style={{ padding: '2rem 1.5rem', borderTop: '1px solid var(--border-subtle)' }}>
+      <div style={{ padding: '2rem 1.5rem', borderTop: '1px solid var(--border-subtle)', minWidth: '280px' }}>
         <AnimatePresence>
           {isOpen ? (
             <motion.div 
@@ -184,7 +206,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen, activeTab, setActi
                 </div>
               </div>
               <div style={{ display: 'flex', gap: '0.75rem' }}>
-                <motion.button whileHover={{ scale: 1.05 }} className="glass-card" style={{ flex: 1, padding: '0.75rem', fontSize: '0.8rem', fontWeight: '900', background: 'rgba(255,255,255,0.05)', color: 'var(--text-dim)', border: 'none', borderRadius: '0.75rem', cursor: 'pointer' }}>
+                <motion.button whileHover={{ scale: 1.05 }} className="glass-card" style={{ flex: 1, padding: '0.75rem', fontSize: '0.8rem', fontWeight: '900', opacity: 0.5, background: 'rgba(255,255,255,0.05)', color: 'var(--text-dim)', border: 'none', borderRadius: '0.75rem', cursor: 'pointer' }}>
                   <Settings size={16} />
                 </motion.button>
                 <motion.button whileHover={{ scale: 1.05 }} className="glass-card" style={{ flex: 1, padding: '0.75rem', fontSize: '0.8rem', fontWeight: '900', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: 'none', borderRadius: '0.75rem', cursor: 'pointer' }}>

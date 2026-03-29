@@ -15,6 +15,11 @@ export interface Story {
   category: string;
   sentiment: 'positive' | 'neutral' | 'warning';
   relevance: number;
+  urlToImage?: string;
+  description?: string;
+  source: {
+    name: string;
+  };
 }
 
 export interface StoryArc {

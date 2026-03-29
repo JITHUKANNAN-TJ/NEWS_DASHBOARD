@@ -1,21 +1,17 @@
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Persona, Story } from '../../types';
-import { PERSONA_CONFIG } from '../../data/mockData';
+import { motion } from 'framer-motion';
 import { 
-  AlertCircle, 
-  Loader2, 
   TrendingUp, 
+  Search, 
   Zap, 
-  Target, 
-  ArrowRight, 
-  BarChart3, 
-  Globe, 
-  Briefcase, 
+  ArrowUpRight, 
+  Activity, 
+  Clock, 
+  Target,
   GraduationCap,
-  Sparkles,
-  Search
+  Briefcase
 } from 'lucide-react';
+import { Persona, Story } from '../../types';
 
 interface HomeFeedProps {
   persona: Persona;
@@ -23,35 +19,43 @@ interface HomeFeedProps {
   isLoading: boolean;
   error: string | null;
   onAnalyze: (story: Story) => void;
-  onNotify: (message: string) => void;
+  onNotify: (msg: string) => void;
 }
 
 const HomeFeed: React.FC<HomeFeedProps> = ({ persona, stories, isLoading, error, onAnalyze, onNotify }) => {
-  const config = PERSONA_CONFIG[persona];
-  const Icon = config.icon;
-  const themeVar = `--${persona}-primary`;
-
+  
   const renderPersonaDashboard = () => {
-    switch(persona) {
+    const DashboardCard = ({ icon, label, value, trend, color }: any) => (
+      <div className="glass-card" style={{ padding: '1.5rem', flex: '1 1 200px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+          <div style={{ padding: '0.6rem', background: `${color}15`, color, borderRadius: '0.75rem' }}>{icon}</div>
+          <div style={{ color: '#10b981', fontWeight: '800', fontSize: '0.8rem' }}>{trend}</div>
+        </div>
+        <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem', fontWeight: '600' }}>{label}</div>
+        <div style={{ fontSize: '1.5rem', fontWeight: '900', color: 'white' }}>{value}</div>
+      </div>
+    );
+
+    switch (persona) {
       case 'investor':
         return (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem', marginBottom: '3rem' }}>
-            <DashboardCard icon={<BarChart3 size={20} />} label="Market Heatmap" value="BULLISH" trend="+2.4%" color="#10b981" />
-            <DashboardCard icon={<Globe size={20} />} label="Global Macro" value="STABLE" trend="0.0%" color="#3b82f6" />
-            <DashboardCard icon={<Zap size={20} />} label="Signal Strength" value="HIGH" trend="89%" color="#f59e0b" />
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem', marginBottom: '3rem' }}>
+            <DashboardCard icon={<Activity size={20} />} label="Portfolio Pulse" value="+2.4%" trend="Live" color="#10b981" />
+            <DashboardCard icon={<Zap size={20} />} label="Sector Volatility" value="Low" trend="-12%" color="#3b82f6" />
+            <DashboardCard icon={<Target size={20} />} label="Strategic Alpha" value="94.2" trend="+1.5" color="#a855f7" />
           </div>
         );
       case 'founder':
         return (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem', marginBottom: '3rem' }}>
-            <DashboardCard icon={<Briefcase size={20} />} label="Ecosystem Pulse" value="ACTIVE" trend="+12 Deals" color="#7c3aed" />
-            <DashboardCard icon={<Target size={20} />} label="Competitor Moves" value="ALERT" trend="3 New" color="#ef4444" />
-            <DashboardCard icon={<Sparkles size={20} />} label="Growth Signals" value="POSITIVE" trend="92%" color="#10b981" />
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem', marginBottom: '3rem' }}>
+            <DashboardCard icon={<Briefcase size={20} />} label="Ecosystem Signals" value="High" trend="Critical" color="#f59e0b" />
+            <DashboardCard icon={<TrendingUp size={20} />} label="Venture Velocity" value="8.4x" trend="Hot" color="#ec4899" />
+            <DashboardCard icon={<Search size={20} />} label="Maverick Index" value="Elite" trend="98 pct" color="#6366f1" />
           </div>
         );
       case 'student':
         return (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem', marginBottom: '3rem' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem', marginBottom: '3rem' }}>
             <DashboardCard icon={<GraduationCap size={20} />} label="Concepts Mastery" value="78%" trend="+5% Today" color="#3b82f6" />
             <DashboardCard icon={<Search size={20} />} label="Career Pivot" value="OPEN" trend="12 Ops" color="#10b981" />
             <DashboardCard icon={<TrendingUp size={20} />} label="Learning Arc" value="STEADY" trend="Lvl 4" color="#a855f7" />
@@ -69,205 +73,90 @@ const HomeFeed: React.FC<HomeFeedProps> = ({ persona, stories, isLoading, error,
       style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}
     >
       {/* Cinematic Hero Section */}
-      <section style={{ position: 'relative', minHeight: '320px', display: 'flex', alignItems: 'center' }}>
+      <section style={{ position: 'relative', minHeight: '320px', borderRadius: '3rem', overflow: 'hidden' }}>
         <div style={{
           position: 'absolute',
           inset: 0,
           background: `var(--${persona}-gradient)`,
-          borderRadius: '3rem',
           opacity: 0.9,
           zIndex: 0,
           boxShadow: `0 40px 100px -20px var(--${persona}-bg)`
         }} />
-        
-        {/* Animated Background Mesh */}
-        <div style={{
-          position: 'absolute',
-          inset: 0,
-          background: 'url("https://www.transparenttextures.com/patterns/carbon-fibre.png")',
-          opacity: 0.1,
-          zIndex: 1,
-          borderRadius: '3rem'
-        }} />
-
-        <div style={{ padding: '4rem', position: 'relative', zIndex: 2, display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
-          <div style={{ maxWidth: '600px' }}>
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}
-            >
-              <span style={{ padding: '0.4rem 1rem', borderRadius: '2rem', backgroundColor: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(10px)', fontSize: '0.75rem', fontWeight: '900', color: 'white', letterSpacing: '0.1em' }}>
-                MY ET 2026 • {persona.toUpperCase()} MODE
-              </span>
+        <div className="flex-center stack-mobile" style={{ height: '100%', padding: 'var(--main-padding)', gap: '4rem', position: 'relative', zIndex: 10, alignItems: 'center', justifyContent: 'center', textAlign: 'center', minHeight: '320px' }}>
+          <div style={{ flex: 1 }}>
+            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}>
+               <h1 className="heading" style={{ color: 'white', fontWeight: '900', lineHeight: '1', marginBottom: '1.5rem', letterSpacing: '-0.05em' }}>
+                 Your Intel, <br/> Redefined.
+               </h1>
+               <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center' }}>
+                 <button onClick={() => onNotify("Live Briefing Scheduled.")} className="glass-panel" style={{ padding: '1rem 2rem', borderRadius: '1.25rem', color: 'white', fontWeight: '900', border: 'none', cursor: 'pointer' }}>
+                   Live Briefing
+                 </button>
+                 <button className="flex-center" style={{ background: 'transparent', border: 'none', color: 'white', fontWeight: '800', gap: '0.75rem', cursor: 'pointer' }}>
+                    Watch Aura <Clock size={20} />
+                 </button>
+               </div>
             </motion.div>
-            <motion.h1 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              style={{ fontSize: '4rem', fontWeight: '900', color: 'white', lineHeight: '0.95', marginBottom: '1.5rem' }}>
-              {config.title}
-            </motion.h1>
-            <motion.p 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 0.9, y: 0 }}
-              transition={{ delay: 0.2 }}
-              style={{ fontSize: '1.4rem', color: 'rgba(255,255,255,0.85)', fontWeight: '500', lineHeight: '1.4' }}>
-              {config.description}
-            </motion.p>
           </div>
-          
-          <motion.div
-            animate={{ rotate: [0, 5, -5, 0] }}
-            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-            style={{ 
-              width: '180px', height: '180px', borderRadius: '3rem', background: 'rgba(255,255,255,0.1)', 
-              backdropFilter: 'blur(30px)', border: '1px solid rgba(255,255,255,0.2)', display: 'flex', 
-              alignItems: 'center', justifyContent: 'center', color: 'white', boxShadow: 'var(--shadow-lg)'
-            }}
-          >
-            <Icon size={80} strokeWidth={1.5} />
-          </motion.div>
+          <div style={{ flex: 1, width: '100%' }}>
+            {renderPersonaDashboard()}
+          </div>
         </div>
       </section>
 
-      {/* Intelligence Dashboard Wrapper */}
-      <section>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: '900', color: 'var(--text-main)' }}>Intelligence Dashboard</h2>
-            <div style={{ flex: 1, height: '1px', background: 'var(--border-subtle)' }} />
-        </div>
-        {renderPersonaDashboard()}
-      </section>
-
-      {/* Feed Section */}
+      {/* Intelligence Feed */}
       <section>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
-          <div>
-            <h2 style={{ fontSize: '2rem', fontWeight: '900', marginBottom: '0.5rem' }}>Dynamic News Stream</h2>
-            <p style={{ color: 'var(--text-muted)', fontWeight: '600' }}>AI-Synthesized for your specific risk profile.</p>
+          <h2 className="heading" style={{ color: 'white', fontWeight: '900' }}>Strategic Broadcast</h2>
+          <div className="hide-mobile" style={{ display: 'flex', gap: '0.75rem' }}>
+            {['All', 'Markets', 'Tech', 'Geopolitics'].map(tag => (
+              <button key={tag} className="glass-card" style={{ padding: '0.5rem 1.25rem', borderRadius: '1rem', background: 'transparent', color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: '700', cursor: 'pointer' }}>{tag}</button>
+            ))}
           </div>
-          {isLoading && <Loader2 className="spin" size={32} style={{ color: `var(${themeVar})` }} />}
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem' }}>
-          <AnimatePresence mode="popLayout">
-            {isLoading ? (
-              [1, 2, 3, 4].map(n => <SkeletonCard key={n} />)
-            ) : stories.length === 0 ? (
-                <div style={{ padding: '4rem', textAlign: 'center', backgroundColor: 'var(--bg-surface)', borderRadius: '2rem' }}>
-                    <AlertCircle size={48} style={{ color: 'var(--text-dim)', marginBottom: '1rem' }} />
-                    <p style={{ fontWeight: '700', color: 'var(--text-muted)' }}>No intelligence synced for this vector currently.</p>
+        {isLoading ? (
+          <div className="flex-center" style={{ height: '300px', flexDirection: 'column', gap: '1rem' }}>
+            <Activity className="spin text-primary" size={48} />
+            <span style={{ fontWeight: '800', letterSpacing: '0.1em', opacity: 0.5 }}>SYNCHRONIZING INTEL...</span>
+          </div>
+        ) : error ? (
+          <div className="glass-panel" style={{ padding: '3rem', borderRadius: '2rem', textAlign: 'center' }}>
+             <p style={{ color: '#ef4444', fontWeight: '800' }}>{error}</p>
+          </div>
+        ) : (
+          <div className="grid-responsive">
+            {stories.map((story, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 * i }}
+                whileHover={{ y: -8 }}
+                onClick={() => onAnalyze(story)}
+                className="glass-card"
+                style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column' }}
+              >
+                <div style={{ height: '200px', width: '100%', position: 'relative', overflow: 'hidden' }}>
+                   <img src={story.urlToImage || `https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=800&auto=format&fit=crop`} alt={story.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                   <div style={{ position: 'absolute', top: '1rem', left: '1rem', padding: '0.4rem 0.8rem', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', borderRadius: '0.5rem', color: 'white', fontSize: '0.7rem', fontWeight: '900' }}>{story.source.name.toUpperCase()}</div>
                 </div>
-            ) : (
-              stories.map((story, i) => (
-                <NewsCard 
-                  key={story.id} 
-                  story={story} 
-                  index={i} 
-                  persona={persona}
-                  onAnalyze={() => onAnalyze(story)} 
-                />
-              ))
-            )}
-          </AnimatePresence>
-        </div>
+                <div style={{ padding: '1.75rem', flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                   <h3 style={{ fontSize: '1.25rem', fontWeight: '800', lineHeight: '1.3' }}>{story.title}</h3>
+                   <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: '1.5', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{story.description}</p>
+                   <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div style={{ color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: '900', fontSize: '0.8rem' }}>
+                        DEEP ANALYSIS <ArrowUpRight size={14} />
+                      </div>
+                   </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
       </section>
     </motion.div>
   );
 };
-
-const DashboardCard = ({ icon, label, value, trend, color }: any) => (
-    <motion.div 
-      whileHover={{ y: -8 }}
-      className="glass-card" 
-      style={{ padding: '2rem', display: 'flex', gap: '1.5rem', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.03)' }}
-    >
-        <div style={{ padding: '1rem', borderRadius: '1.25rem', backgroundColor: `${color}15`, color: color }}>
-            {icon}
-        </div>
-        <div>
-            <div style={{ fontSize: '0.8rem', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.25rem' }}>{label}</div>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.75rem' }}>
-                <span style={{ fontSize: '1.75rem', fontWeight: '900' }}>{value}</span>
-                <span style={{ fontSize: '0.85rem', fontWeight: '800', color: trend.startsWith('+') ? '#10b981' : trend.startsWith('-') ? '#ef4444' : color }}>{trend}</span>
-            </div>
-        </div>
-    </motion.div>
-);
-
-const NewsCard = ({ story, index, persona, onAnalyze }: any) => {
-    const themeVar = `--${persona}-primary`;
-    return (
-        <motion.div
-            initial={{ opacity: 0, x: -40 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: index * 0.1, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            whileHover={{ scale: 1.01, x: 10 }}
-            className="glass-panel"
-            style={{
-                padding: '2.5rem',
-                borderRadius: '2.5rem',
-                cursor: 'pointer',
-                display: 'grid',
-                gridTemplateColumns: '1fr 200px',
-                gap: '2rem',
-                alignItems: 'center',
-                backgroundColor: 'rgba(255,255,255,0.02)'
-            }}
-            onClick={onAnalyze}
-        >
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
-                    <span style={{ 
-                        padding: '0.5rem 1rem', 
-                        borderRadius: '1rem', 
-                        backgroundColor: 'var(--bg-surface)', 
-                        fontSize: '0.75rem', 
-                        fontWeight: '900', 
-                        color: `var(${themeVar})`,
-                        boxShadow: 'inset 0 0 10px rgba(255,255,255,0.05)'
-                    }}>
-                        {story.category.toUpperCase()}
-                    </span>
-                    <span style={{ fontSize: '0.8rem', fontWeight: '800', color: 'var(--text-dim)', letterSpacing: '0.1em' }}>
-                        {story.relevance}% RELEVANCE
-                    </span>
-                    <div style={{ 
-                        width: '10px', height: '10px', borderRadius: '50%', 
-                        backgroundColor: story.sentiment === 'positive' ? '#10b981' : story.sentiment === 'warning' ? '#ef4444' : '#64748b',
-                        boxShadow: `0 0 15px ${story.sentiment === 'positive' ? '#10b981' : story.sentiment === 'warning' ? '#ef4444' : '#64748b'}`
-                    }} />
-                </div>
-                <h3 className="heading" style={{ fontSize: '1.85rem', fontWeight: '800', lineHeight: '1.2', color: 'var(--text-main)', letterSpacing: '-0.02em' }}>
-                    {story.title}
-                </h3>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: `var(${themeVar})`, fontWeight: '800', fontSize: '0.9rem' }}>
-                    OPEN INTELLIGENCE BRIEFING <ArrowRight size={18} />
-                </div>
-            </div>
-            
-            {/* Visual Preview Placeholder */}
-            <div style={{ 
-                height: '140px', 
-                width: '100%', 
-                borderRadius: '1.5rem', 
-                background: `linear-gradient(45deg, var(--bg-surface), var(--bg-main))`,
-                overflow: 'hidden',
-                position: 'relative',
-                border: '1px solid var(--border-subtle)'
-            }}>
-                <div style={{ position: 'absolute', inset: 0, opacity: 0.1, background: 'url("https://www.transparenttextures.com/patterns/carbon-fibre.png")' }} />
-                <div className="flex-center" style={{ height: '100%' }}>
-                    <Sparkles size={32} style={{ opacity: 0.1, color: `var(${themeVar})` }} />
-                </div>
-            </div>
-        </motion.div>
-    );
-};
-
-const SkeletonCard = () => (
-    <div className="glass-card animate-shimmer" style={{ height: '180px', borderRadius: '2.5rem', opacity: 0.1 }} />
-);
 
 export default HomeFeed;

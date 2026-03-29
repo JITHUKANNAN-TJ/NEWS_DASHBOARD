@@ -21,7 +21,8 @@ import ImpactModal from './components/Tabs/ImpactModal';
 
 const App = () => {
   const [persona, setPersona] = useState<Persona>('investor');
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 1024);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
   const [activeTab, setActiveTab] = useState('home');
   
   // Data State
@@ -36,6 +37,19 @@ const App = () => {
     isVisible: false
   });
   const [selectedStory, setSelectedStory] = useState<Story | null>(null);
+
+  // Responsive Listener
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth <= 1024;
+      setIsMobile(mobile);
+      if (mobile) setSidebarOpen(false);
+      else setSidebarOpen(true);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const showToast = (message: string, type: ToastType = 'success') => {
     setToast({ message, type, isVisible: true });
@@ -67,15 +81,15 @@ const App = () => {
   return (
     <div style={{
       display: 'flex',
-      height: '100vh',
+      minHeight: '100vh',
       backgroundColor: 'var(--bg-main)',
       color: 'var(--text-main)',
-      overflow: 'hidden',
-      position: 'relative'
+      position: 'relative',
+      overflowX: 'hidden'
     }}>
       {/* Global Cinematic Background */}
       <div style={{
-        position: 'absolute',
+        position: 'fixed',
         inset: 0,
         background: `radial-gradient(circle at 50% -20%, var(--${persona}-bg) 0%, transparent 70%)`,
         opacity: 0.6,
@@ -84,7 +98,7 @@ const App = () => {
         transition: 'all 1s cubic-bezier(0.16, 1, 0.3, 1)'
       }} />
       <div style={{
-        position: 'absolute',
+        position: 'fixed',
         inset: 0,
         background: 'url("https://www.transparenttextures.com/patterns/carbon-fibre.png")',
         opacity: 0.05,
@@ -98,6 +112,7 @@ const App = () => {
         setIsOpen={setSidebarOpen} 
         activeTab={activeTab} 
         setActiveTab={setActiveTab} 
+        isMobile={isMobile}
       />
 
       {/* Main Content Area */}
@@ -105,20 +120,24 @@ const App = () => {
         flex: 1,
         display: 'flex',
         flexDirection: 'column',
-        overflow: 'hidden',
         position: 'relative',
         zIndex: 10,
         backgroundColor: 'rgba(10, 12, 16, 0.4)',
-        backdropFilter: 'blur(5px)'
+        backdropFilter: 'blur(5px)',
+        minWidth: 0 // Prevent flex overflow
       }}>
         {/* Global Top Bar */}
-        <TopBar persona={persona} setPersona={setPersona} />
+        <TopBar 
+          persona={persona} 
+          setPersona={setPersona} 
+          onMenuClick={() => setSidebarOpen(!sidebarOpen)}
+          isMobile={isMobile}
+        />
 
-        {/* Scrollable Tab Content with Professional Animations */}
+        {/* Tab Content */}
         <main style={{
           flex: 1,
-          overflowY: 'auto',
-          padding: '3rem',
+          padding: 'var(--main-padding)',
           position: 'relative'
         }}>
           <AnimatePresence mode="wait">
@@ -128,7 +147,7 @@ const App = () => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -15 }}
               transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-              style={{ minHeight: '100%' }}
+              style={{ width: '100%' }}
             >
               {activeTab === 'home' && (
                 <HomeFeed 
@@ -164,6 +183,25 @@ const App = () => {
           </AnimatePresence>
         </main>
       </div>
+
+      {/* Mobile Sidebar Backdrop */}
+      <AnimatePresence>
+        {isMobile && sidebarOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSidebarOpen(false)}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              backgroundColor: 'rgba(0,0,0,0.6)',
+              backdropFilter: 'blur(4px)',
+              zIndex: 95
+            }}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Global Feedback Layers */}
       <Toast 
