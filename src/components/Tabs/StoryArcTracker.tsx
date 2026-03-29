@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   BarChart3, 
@@ -13,9 +13,11 @@ import {
   Eye,
   AlertTriangle,
   ArrowUpRight,
-  Activity
+  Activity,
+  Loader2
 } from 'lucide-react';
 import { STORY_ARCS } from '../../data/mockData';
+import { predictStoryArc } from '../../services/aiService';
 
 interface StoryArcTrackerProps {
   onNotify: (message: string, type?: 'success' | 'info' | 'error') => void;
@@ -23,8 +25,30 @@ interface StoryArcTrackerProps {
 
 const StoryArcTracker: React.FC<StoryArcTrackerProps> = ({ onNotify }) => {
   const [selectedArc, setSelectedArc] = useState<string | null>(STORY_ARCS[0].id);
+  const [isPredicting, setIsPredicting] = useState(false);
+  const [prediction, setPrediction] = useState<{ prediction: string, probability: number } | null>(null);
 
   const activeArc = STORY_ARCS.find(a => a.id === selectedArc);
+
+  useEffect(() => {
+    if (activeArc) {
+      handlePredict();
+    }
+  }, [selectedArc]);
+
+  const handlePredict = async () => {
+    if (!activeArc) return;
+    setIsPredicting(true);
+    setPrediction(null);
+    try {
+      const data = await predictStoryArc(activeArc.title, activeArc.status, activeArc.players);
+      setPrediction(data);
+    } catch (error) {
+       console.error("Prediction failed");
+    } finally {
+      setIsPredicting(false);
+    }
+  };
 
   return (
     <motion.div 
@@ -109,7 +133,7 @@ const StoryArcTracker: React.FC<StoryArcTrackerProps> = ({ onNotify }) => {
                             NARRATIVE ARC 2026-A
                         </span>
                         <div style={{ display: 'flex', gap: '0.4rem', color: 'var(--text-dim)', fontWeight: '700', fontSize: '0.85rem' }}>
-                            <Calendar size={14} /> ACTIVE SINCE JAN 12.
+                            <Calendar size={14} /> ACTIVE SINCE {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase()}
                         </div>
                     </motion.div>
                     <h2 className="heading" style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: '900', color: 'white', lineHeight: '1.1', letterSpacing: '-0.04em' }}>
@@ -117,7 +141,7 @@ const StoryArcTracker: React.FC<StoryArcTrackerProps> = ({ onNotify }) => {
                     </h2>
                 </div>
                 <div style={{ display: 'flex', gap: '1rem' }}>
-                    <button className="glass-card" style={{ padding: '0.75rem', borderRadius: '1.25rem', border: '1px solid var(--border-subtle)', cursor: 'pointer', background: 'rgba(255,255,255,0.03)' }}>
+                    <button onClick={() => onNotify("Synthesis state shared.", "info")} className="glass-card" style={{ padding: '0.75rem', borderRadius: '1.25rem', border: '1px solid var(--border-subtle)', cursor: 'pointer', background: 'rgba(255,255,255,0.03)' }}>
                         <Share2 size={24} />
                     </button>
                     <button className="glass-card" style={{ padding: '0.75rem', borderRadius: '1.25rem', border: '1px solid var(--border-subtle)', cursor: 'pointer', background: 'rgba(255,255,255,0.03)' }}>
@@ -132,7 +156,9 @@ const StoryArcTracker: React.FC<StoryArcTrackerProps> = ({ onNotify }) => {
                     <h4 style={{ fontWeight: '900', color: 'white', textTransform: 'uppercase', letterSpacing: '0.1em', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                         <TrendingUp size={18} style={{ color: 'var(--primary)' }} /> Visual Narrative Timeline
                     </h4>
-                    <div style={{ fontSize: '0.85rem', fontWeight: '800', color: 'var(--text-dim)' }}>PROBABILITY ACCURACY: 92%</div>
+                    <div style={{ fontSize: '0.85rem', fontWeight: '800', color: 'var(--text-dim)' }}>
+                        {isPredicting ? "CALCULATING PROBABILITY..." : `PROBABILITY ACCURACY: ${prediction?.probability || 92}%`}
+                    </div>
                 </div>
 
                 <div style={{ position: 'relative', height: '180px', display: 'flex', alignItems: 'flex-end', overflowX: 'auto', paddingBottom: '1rem' }}>
@@ -176,6 +202,26 @@ const StoryArcTracker: React.FC<StoryArcTrackerProps> = ({ onNotify }) => {
                                 </div>
                             </motion.div>
                         ))}
+                        
+                        {/* Dynamic AI Node */}
+                        <motion.div 
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem', width: '200px', borderLeft: '1px dashed var(--border-subtle)', paddingLeft: '2rem' }}
+                        >
+                            <div style={{ 
+                                width: '24px', height: '24px', borderRadius: '50%', 
+                                background: 'var(--founder-gradient)', 
+                                boxShadow: '0 0 25px var(--founder-primary)',
+                                border: '4px solid var(--bg-surface)'
+                            }} className="pulse" />
+                            <div style={{ textAlign: 'left' }}>
+                                <div style={{ fontSize: '0.85rem', fontWeight: '900', color: 'var(--founder-primary)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>AI FORECAST</div>
+                                <div style={{ fontSize: '1rem', fontWeight: '700', color: 'white', lineHeight: '1.4', fontStyle: 'italic' }}>
+                                    {isPredicting ? "Synthesizing next catalyst..." : prediction?.prediction || "Predicting next structural shift..."}
+                                </div>
+                            </div>
+                        </motion.div>
                     </div>
                 </div>
             </section>
@@ -244,16 +290,22 @@ const StoryArcTracker: React.FC<StoryArcTrackerProps> = ({ onNotify }) => {
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem', fontWeight: '800', color: 'var(--text-dim)', flexWrap: 'wrap', gap: '0.5rem' }}>
                                 <span>Narrative Saturation</span>
-                                <span>68%</span>
+                                <span>{prediction ? prediction.probability : 68}%</span>
                              </div>
                              <div style={{ height: '8px', width: '100%', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                <motion.div initial={{ width: 0 }} animate={{ width: '68%' }} style={{ height: '100%', background: 'var(--investor-primary)', borderRadius: '4px', boxShadow: '0 0 10px var(--investor-primary)' }} />
+                                <motion.div 
+                                    initial={{ width: 0 }} 
+                                    animate={{ width: `${prediction ? prediction.probability : 68}%` }} 
+                                    style={{ height: '100%', background: 'var(--investor-primary)', borderRadius: '4px', boxShadow: '0 0 10px var(--investor-primary)' }} 
+                                />
                              </div>
                              <div style={{ padding: '1.25rem', borderRadius: '1.5rem', backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-subtle)' }}>
                                 <div style={{ color: 'var(--investor-primary)', fontWeight: '900', fontSize: '0.75rem', marginBottom: '0.4rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                     <Target size={14} /> WHAT TO WATCH NEXT
                                 </div>
-                                <div style={{ color: 'var(--text-main)', fontWeight: '700', fontSize: '0.95rem' }}>Q4 Regulatory Clearance for Pod-Fabs.</div>
+                                <div style={{ color: 'var(--text-main)', fontWeight: '700', fontSize: '0.95rem' }}>
+                                    {prediction ? prediction.prediction : "Q4 Regulatory Clearance for Pod-Fabs."}
+                                </div>
                              </div>
                         </div>
                     </div>

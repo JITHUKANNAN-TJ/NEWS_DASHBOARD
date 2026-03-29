@@ -161,6 +161,8 @@ const App = () => {
               )}
               {activeTab === 'navigator' && (
                 <NewsNavigator 
+                  stories={stories}
+                  persona={persona}
                   onNotify={showToast}
                 />
               )}

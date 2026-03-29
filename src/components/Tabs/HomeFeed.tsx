@@ -1,17 +1,25 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   TrendingUp, 
-  Search, 
   Zap, 
-  ArrowUpRight, 
   Activity, 
+  Target, 
+  ArrowUpRight, 
   Clock, 
-  Target,
+  Briefcase, 
+  Search, 
   GraduationCap,
-  Briefcase
+  Sparkles,
+  X,
+  Brain,
+  ShieldCheck,
+  ChevronRight,
+  Globe,
+  Loader2
 } from 'lucide-react';
-import { Persona, Story } from '../../types';
+import { Story, Persona } from '../../types';
+import { synthesizeBriefing } from '../../services/aiService';
 
 interface HomeFeedProps {
   persona: Persona;
@@ -19,14 +27,32 @@ interface HomeFeedProps {
   isLoading: boolean;
   error: string | null;
   onAnalyze: (story: Story) => void;
-  onNotify: (msg: string) => void;
+  onNotify: (message: string, type?: 'success' | 'info' | 'error') => void;
 }
 
 const HomeFeed: React.FC<HomeFeedProps> = ({ persona, stories, isLoading, error, onAnalyze, onNotify }) => {
-  
-  const renderPersonaDashboard = () => {
+  const [isBriefingOpen, setIsBriefingOpen] = useState(false);
+  const [briefingData, setBriefingData] = useState<{ summary: string; impactVectors: any[] } | null>(null);
+  const [isBriefingLoading, setIsBriefingLoading] = useState(false);
+
+  const handleLiveBriefing = async () => {
+    setIsBriefingOpen(true);
+    setIsBriefingLoading(true);
+    setBriefingData(null);
+    try {
+      const data = await synthesizeBriefing(persona, stories);
+      setBriefingData(data);
+    } catch (err) {
+      onNotify("Briefing synthesis failed. Check AI configuration.", "error");
+      setIsBriefingOpen(false);
+    } finally {
+      setIsBriefingLoading(false);
+    }
+  };
+
+  const renderDashboard = () => {
     const DashboardCard = ({ icon, label, value, trend, color }: any) => (
-      <div className="glass-card" style={{ padding: '1.5rem', flex: '1 1 200px' }}>
+      <div className="glass-card" style={{ flex: '1 1 200px', padding: '1.50rem', border: '1px solid var(--border-subtle)', background: 'rgba(255,255,255,0.02)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
           <div style={{ padding: '0.6rem', background: `${color}15`, color, borderRadius: '0.75rem' }}>{icon}</div>
           <div style={{ color: '#10b981', fontWeight: '800', fontSize: '0.8rem' }}>{trend}</div>
@@ -89,8 +115,12 @@ const HomeFeed: React.FC<HomeFeedProps> = ({ persona, stories, isLoading, error,
                  Your Intel, <br/> Redefined.
                </h1>
                <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center' }}>
-                 <button onClick={() => onNotify("Live Briefing Scheduled.")} className="glass-panel" style={{ padding: '1rem 2rem', borderRadius: '1.25rem', color: 'white', fontWeight: '900', border: 'none', cursor: 'pointer' }}>
-                   Live Briefing
+                 <button 
+                  onClick={handleLiveBriefing} 
+                  className="glass-panel" 
+                  style={{ padding: '1rem 2rem', borderRadius: '1.25rem', color: 'white', fontWeight: '900', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.75rem' }}
+                >
+                   <Sparkles size={20} /> Live Briefing
                  </button>
                  <button className="flex-center" style={{ background: 'transparent', border: 'none', color: 'white', fontWeight: '800', gap: '0.75rem', cursor: 'pointer' }}>
                     Watch Aura <Clock size={20} />
@@ -98,25 +128,87 @@ const HomeFeed: React.FC<HomeFeedProps> = ({ persona, stories, isLoading, error,
                </div>
             </motion.div>
           </div>
-          <div style={{ flex: 1, width: '100%' }}>
-            {renderPersonaDashboard()}
-          </div>
         </div>
       </section>
 
-      {/* Intelligence Feed */}
+      {/* AI Briefing Modal Overlay */}
+      <AnimatePresence>
+        {isBriefingOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(20px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}
+          >
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              className="glass-panel"
+              style={{ width: '100%', maxWidth: '800px', padding: 'clamp(2rem, 4vw, 4rem)', borderRadius: '3rem', position: 'relative', background: 'rgba(15, 18, 24, 0.95)', border: '1px solid var(--border-subtle)' }}
+            >
+              <button 
+                onClick={() => setIsBriefingOpen(false)}
+                style={{ position: 'absolute', top: '2rem', right: '2rem', background: 'rgba(255,255,255,0.05)', border: 'none', color: 'white', padding: '0.5rem', borderRadius: '50%', cursor: 'pointer' }}
+              >
+                <X size={24} />
+              </button>
+
+              <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+                 <div style={{ display: 'inline-flex', padding: '1rem', background: 'var(--primary-gradient)', borderRadius: '1.5rem', color: 'white', marginBottom: '1.5rem', boxShadow: '0 20px 40px -10px var(--primary)' }}>
+                    <Brain size={40} />
+                 </div>
+                 <h2 className="heading" style={{ fontSize: '2.5rem', color: 'white', marginBottom: '0.5rem' }}>Strategic AI Briefing</h2>
+                 <p style={{ color: 'var(--text-muted)', fontWeight: '600', fontSize: '1.1rem' }}>Synthesized Intelligence for the {persona.toUpperCase()} Persona</p>
+              </div>
+
+              {isBriefingLoading ? (
+                <div style={{ padding: '4rem 0', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' }}>
+                  <Loader2 className="spin" size={48} style={{ color: 'var(--primary)' }} />
+                  <p style={{ fontWeight: '800', color: 'var(--primary)', letterSpacing: '0.1em' }}>PROCESSING GLOBAL VECTORS...</p>
+                </div>
+              ) : briefingData ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+                   <div style={{ borderLeft: '4px solid var(--primary)', paddingLeft: '2rem' }}>
+                      <p style={{ fontSize: '1.25rem', lineHeight: '1.6', color: 'rgba(255,255,255,0.9)', fontWeight: '500' }}>
+                        {briefingData.summary}
+                      </p>
+                   </div>
+                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
+                      {briefingData.impactVectors.map((v: any, i: number) => (
+                        <div key={i} className="glass-card" style={{ padding: '1.5rem', textAlign: 'center', border: '1px solid var(--border-subtle)' }}>
+                           <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', fontWeight: '800', marginBottom: '0.5rem', textTransform: 'uppercase' }}>{v.label}</div>
+                           <div style={{ fontSize: '1.5rem', fontWeight: '900', color: 'white' }}>{v.value}</div>
+                        </div>
+                      ))}
+                   </div>
+                   <button 
+                    onClick={() => setIsBriefingOpen(false)}
+                    style={{ width: '100%', padding: '1.25rem', borderRadius: '1.5rem', background: 'var(--primary-gradient)', color: 'white', fontWeight: '900', border: 'none', cursor: 'pointer', marginTop: '1rem' }}
+                  >
+                     ACKNOWLEDGE INTEL
+                   </button>
+                </div>
+              ) : null}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Personalized Dashboard */}
       <section>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
-          <h2 className="heading" style={{ color: 'white', fontWeight: '900' }}>Strategic Broadcast</h2>
-          <div className="hide-mobile" style={{ display: 'flex', gap: '0.75rem' }}>
-            {['All', 'Markets', 'Tech', 'Geopolitics'].map(tag => (
-              <button key={tag} className="glass-card" style={{ padding: '0.5rem 1.25rem', borderRadius: '1rem', background: 'transparent', color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: '700', cursor: 'pointer' }}>{tag}</button>
-            ))}
-          </div>
+        <h2 className="heading" style={{ fontSize: '2rem', marginBottom: '2rem', color: 'white' }}>Intelligence Dashboard</h2>
+        {renderDashboard()}
+      </section>
+
+      {/* Main Feed */}
+      <section style={{ flex: 1 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+          <h2 className="heading" style={{ fontSize: '2rem', color: 'white' }}>Intelligence Stream</h2>
+          <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: '800' }}>FILTERED FOR {persona.toUpperCase()}</div>
         </div>
 
         {isLoading ? (
-          <div className="flex-center" style={{ height: '300px', flexDirection: 'column', gap: '1rem' }}>
+          <div className="flex-center" style={{ padding: '6rem 0', flexDirection: 'column', gap: '1.5rem' }}>
             <Activity className="spin text-primary" size={48} />
             <span style={{ fontWeight: '800', letterSpacing: '0.1em', opacity: 0.5 }}>SYNCHRONIZING INTEL...</span>
           </div>
@@ -146,7 +238,7 @@ const HomeFeed: React.FC<HomeFeedProps> = ({ persona, stories, isLoading, error,
                    <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: '1.5', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{story.description}</p>
                    <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <div style={{ color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: '900', fontSize: '0.8rem' }}>
-                        DEEP ANALYSIS <ArrowUpRight size={14} />
+                         DEEP ANALYSIS <ArrowUpRight size={14} />
                       </div>
                    </div>
                 </div>

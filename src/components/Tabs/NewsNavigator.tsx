@@ -13,16 +13,22 @@ import {
   Cpu,
   ChevronRight,
   TrendingUp,
-  Activity
+  Activity,
+  TrendingDown
 } from 'lucide-react';
+import { Story, Persona } from '../../types';
+import { synthesizeBriefing } from '../../services/aiService';
 
 interface NewsNavigatorProps {
+  stories: Story[];
+  persona: Persona;
   onNotify: (message: string, type?: 'success' | 'info' | 'error') => void;
 }
 
-const NewsNavigator: React.FC<NewsNavigatorProps> = ({ onNotify }) => {
+const NewsNavigator: React.FC<NewsNavigatorProps> = ({ stories, persona, onNotify }) => {
   const [isSynthesizing, setIsSynthesizing] = useState(false);
   const [synthStep, setSynthStep] = useState(0);
+  const [aiData, setAiData] = useState<{ summary: string; impactVectors: any[] } | null>(null);
 
   const synthSteps = [
     { name: "Narrative Synthesis", icon: Brain, detail: "Deep-mapping global intelligence vectors..." },
@@ -30,23 +36,44 @@ const NewsNavigator: React.FC<NewsNavigatorProps> = ({ onNotify }) => {
     { name: "Strategic Evaluation", icon: ShieldCheck, detail: "Assessing structural risk & impact alpha..." }
   ];
 
-  const handleSynthesize = () => {
+  const handleSynthesize = async () => {
     setIsSynthesizing(true);
     setSynthStep(0);
+    setAiData(null);
     
-    const interval = setInterval(() => {
-      setSynthStep(prev => {
-        if (prev >= synthSteps.length - 1) {
-          clearInterval(interval);
-          setTimeout(() => {
-            setIsSynthesizing(false);
-            onNotify("Intelligence Briefing: Strategic Layer Online.", "success");
-          }, 2000);
-          return prev;
-        }
-        return prev + 1;
-      });
-    }, 2500);
+    // Simulate multi-stage visual process but perform real AI in background
+    const visualInterval = setInterval(() => {
+      setSynthStep(prev => (prev < synthSteps.length - 1 ? prev + 1 : prev));
+    }, 2000);
+
+    try {
+      const data = await synthesizeBriefing(persona, stories);
+      
+      clearInterval(visualInterval);
+      setSynthStep(synthSteps.length - 1);
+      
+      setTimeout(() => {
+        setAiData(data);
+        setIsSynthesizing(false);
+        onNotify("Intelligence Briefing: Strategic Layer Online.", "success");
+      }, 1500);
+    } catch (error) {
+      clearInterval(visualInterval);
+      setIsSynthesizing(false);
+      onNotify("AI Synthesis failed. Check API configuration.", "error");
+    }
+  };
+
+  const getIcon = (name: string) => {
+    const icons: any = { 
+        'trending-up': TrendingUp, 
+        'globe': Globe, 
+        'zap': Zap, 
+        'activity': Activity,
+        'trending-down': TrendingDown 
+    };
+    const IconComp = icons[name] || Activity;
+    return <IconComp size={18} />;
   };
 
   return (
@@ -55,7 +82,7 @@ const NewsNavigator: React.FC<NewsNavigatorProps> = ({ onNotify }) => {
       animate={{ opacity: 1, y: 0 }}
       className="glass-panel"
       style={{
-        padding: 'clamp(1rem, 3vw, 3rem)',
+        padding: 'clamp(1rem, 3vw, 3.5rem)',
         borderRadius: '3rem',
         minHeight: '85vh',
         display: 'flex',
@@ -151,19 +178,19 @@ const NewsNavigator: React.FC<NewsNavigatorProps> = ({ onNotify }) => {
              </h4>
              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
                 <p style={{ fontSize: '1.25rem', lineHeight: '1.7', color: 'rgba(255,255,255,0.9)', fontWeight: '500' }}>
-                  Strategic indicators suggest a structural pivot in the semiconductor sector. Regional focus shifts from long-lead nodes to agile local manufacturing pods, driven by Q1 regulatory shifts.
+                  {aiData ? aiData.summary : "Strategic indicators suggest a structural pivot in the semiconductor sector. Regional focus shifts from long-lead nodes to agile local manufacturing pods, driven by Q1 regulatory shifts."}
                 </p>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.25rem' }}>
-                    {[
-                      { icon: <TrendingUp size={18} />, label: "GDP Impact", val: "+2.4%" },
-                      { icon: <Globe size={18} />, label: "Supply Risk", val: "Critical" },
-                      { icon: <BarChart3 size={18} />, label: "Tech Saturation", val: "Lo" }
-                    ].map((m, i) => (
+                    {(aiData ? aiData.impactVectors : [
+                      { icon: 'trending-up', label: "GDP Impact", value: "+2.4%" },
+                      { icon: 'globe', label: "Supply Risk", value: "Critical" },
+                      { icon: 'zap', label: "Tech Saturation", value: "Lo" }
+                    ]).map((m: any, i: number) => (
                       <div key={i} className="glass-card" style={{ padding: '1rem 1.5rem', borderRadius: '1.25rem', backgroundColor: 'rgba(255,255,255,0.03)', display: 'flex', alignItems: 'center', gap: '1rem', border: '1px solid var(--border-subtle)', flex: '1 1 140px' }}>
-                        <div style={{ color: 'var(--primary)' }}>{m.icon}</div>
+                        <div style={{ color: 'var(--primary)' }}>{getIcon(m.icon)}</div>
                         <div>
                            <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', fontWeight: '800' }}>{m.label}</div>
-                           <div style={{ fontSize: '1.1rem', fontWeight: '900', color: 'white' }}>{m.val}</div>
+                           <div style={{ fontSize: '1.1rem', fontWeight: '900', color: 'white' }}>{m.value}</div>
                         </div>
                       </div>
                     ))}
@@ -176,12 +203,7 @@ const NewsNavigator: React.FC<NewsNavigatorProps> = ({ onNotify }) => {
                 <Cpu size={20} className="text-primary" /> Intelligence Nodes
              </h4>
              <div className="grid-responsive" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                {[
-                  "Market Summary: Semiconductor Q1",
-                  "Editorial: The Rise of GenAI Ops",
-                  "Data Table: Export Volumes 2026",
-                  "Interview Transcript: CEO Alpha"
-                ].map((node, i) => (
+                {stories.slice(0, 4).map((node, i) => (
                    <motion.div 
                      key={i} 
                      whileHover={{ x: 8, backgroundColor: 'rgba(255,255,255,0.03)' }}
@@ -198,7 +220,7 @@ const NewsNavigator: React.FC<NewsNavigatorProps> = ({ onNotify }) => {
                    >
                       <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
                         <CheckCircle2 size={24} style={{ color: '#10b981' }} />
-                        <span style={{ fontWeight: '800', color: 'white', fontSize: '1.1rem' }}>{node}</span>
+                        <span style={{ fontWeight: '800', color: 'white', fontSize: '1.1rem' }}>{node.title}</span>
                       </div>
                       <ChevronRight size={20} style={{ color: 'var(--text-dim)' }} />
                    </motion.div>

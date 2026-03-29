@@ -11,8 +11,11 @@ import {
   Map, 
   MessageSquare,
   Zap,
-  BookOpen
+  BookOpen,
+  Wifi,
+  Loader2
 } from 'lucide-react';
+import { adaptCulturally } from '../../services/aiService';
 
 interface VernacularEngineProps {
   onNotify: (message: string, type?: 'success' | 'info' | 'error') => void;
@@ -21,24 +24,47 @@ interface VernacularEngineProps {
 const VernacularEngine: React.FC<VernacularEngineProps> = ({ onNotify }) => {
   const [selectedLang, setSelectedLang] = useState('Hindi');
   const [isTranslating, setIsTranslating] = useState(false);
+  const [aiContent, setAiContent] = useState<{ translation: string; analogy: string } | null>(null);
 
   const languages = [
-    { name: 'Hindi', native: 'हिन्दी', region: 'North/Central India', analogy: "Solid as a 'Haveli' - structural integrity in policy." },
-    { name: 'Tamil', native: 'தமிழ்', region: 'South India', analogy: "Deep as the 'Ocean' - ancient wisdom, modern tech." },
-    { name: 'Bengali', native: 'বাংলা', region: 'East India', analogy: "Flowing as a 'River' - connectivity and commerce." },
-    { name: 'Marathi', native: 'मराठी', region: 'West India', analogy: "Strong as a 'Fort' - resilience in market cycles." },
-    { name: 'Gujarati', native: 'ગુજરાતી', region: 'West India', analogy: "Sharp as a 'Merchant's' eye - optimization of every paisa." },
-    { name: 'Telugu', native: 'తెలుగు', region: 'South India', analogy: "Precise as 'Tech' code - performance-driven logic." }
+    { name: 'Hindi', native: 'हिन्दी', region: 'North/Central India' },
+    { name: 'Tamil', native: 'தமிழ்', region: 'South India' },
+    { name: 'Bengali', native: 'বাংলা', region: 'East India' },
+    { name: 'Marathi', native: 'मराठी', region: 'West India' },
+    { name: 'Gujarati', native: 'ગુજરાતી', region: 'West India' },
+    { name: 'Telugu', native: 'తెలుగు', region: 'South India' }
   ];
 
-  const currentLang = languages.find(l => l.name === selectedLang) || languages[0];
-
-  const handleTranslate = () => {
+  const handleTranslate = async () => {
     setIsTranslating(true);
-    setTimeout(() => {
+    setAiContent(null);
+
+    const sourceText = "The central bank is expected to maintain its hawkish stance in the upcoming policy meeting, citing persistent inflationary pressures in the manufacturing sector.";
+    
+    try {
+      const data = await adaptCulturally(sourceText, selectedLang);
+      setAiContent(data);
       setIsTranslating(false);
       onNotify(`Cultural mapping for ${selectedLang} complete.`, "success");
-    }, 3000);
+    } catch (error) {
+      setIsTranslating(false);
+      onNotify("Adaptation failed. Sync with Aura Engine lost.", "error");
+    }
+  };
+
+  const handleVoiceNarration = () => {
+    if (!aiContent) {
+        onNotify("Adapt content first to generate voice masters.", "info");
+        return;
+    }
+    onNotify(`Aura Vernacular Narration: Initiating ${selectedLang} synthesis...`, "success");
+    
+    const synth = window.speechSynthesis;
+    const utterance = new SpeechSynthesisUtterance(aiContent.translation);
+    utterance.rate = 0.9;
+    utterance.pitch = 1.1;
+    // Attempt to find a matching voice if possible, else use default
+    synth.speak(utterance);
   };
 
   return (
@@ -136,7 +162,7 @@ const VernacularEngine: React.FC<VernacularEngineProps> = ({ onNotify }) => {
 
         {/* Adaptation & Preview Area */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-          <div className="glass-card" style={{ flex: 1, padding: 'clamp(1.5rem, 3vw, 3rem)', borderRadius: '2.5rem', backgroundColor: 'rgba(255,255,255,0.01)', border: '1px solid var(--border-subtle)', minHeight: '300px' }}>
+          <div className="glass-card" style={{ flex: 1, padding: 'clamp(1.5rem, 3vw, 3rem)', borderRadius: '2.5rem', backgroundColor: 'rgba(255,255,255,0.01)', border: '1px solid var(--border-subtle)', minHeight: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <AnimatePresence mode="wait">
                 {isTranslating ? (
                   <motion.div 
@@ -153,22 +179,17 @@ const VernacularEngine: React.FC<VernacularEngineProps> = ({ onNotify }) => {
                     </div>
                     <p style={{ fontWeight: '800', color: 'var(--investor-primary)', letterSpacing: '0.1em' }}>MAPPING CULTURAL VECTORS...</p>
                   </motion.div>
-                ) : (
+                ) : aiContent ? (
                   <motion.div 
                     key="result"
                     initial={{ opacity: 0, x: -30 }}
                     animate={{ opacity: 1, x: 0 }}
-                    style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}
+                    style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem', width: '100%' }}
                   >
                      <div>
                         <div style={{ fontSize: '0.8rem', fontWeight: '900', color: 'var(--investor-primary)', marginBottom: '1rem', letterSpacing: '0.1em' }}>ADAPTED TARGET ({selectedLang.toUpperCase()})</div>
-                        <p style={{ fontSize: 'clamp(1.5rem, 3vw, 2.5rem)', fontWeight: '800', lineHeight: '1.3', color: 'white' }}>
-                          {selectedLang === 'Hindi' ? 
-                            "केंद्रीय बैंक आगामी नीति बैठक में अपना सख्त रुख बरकरार रख सकता है, क्योंकि विनिर्माण क्षेत्र में मुद्रास्फीति का दबाव बना हुआ है।" :
-                           selectedLang === 'Tamil' ?
-                            "உற்பத்தித் துறையில் நீடித்த பணவீக்க அழுத்தங்களைக் மேற்கோள் காட்டி, வரவிருக்கும் கொள்கை கூட்டத்தில் மத்திய வங்கி தனது பருந்து நிலைப்பாட்டை தக்க வைத்துக் கொள்ளும் என்று எதிர்பார்க்கப்படுகிறது." :
-                            `Intelligence briefing successfully adapted for ${selectedLang} cultural context.`
-                          }
+                        <p style={{ fontSize: 'clamp(1.5rem, 3vw, 2.2rem)', fontWeight: '800', lineHeight: '1.3', color: 'white' }}>
+                          {aiContent.translation}
                         </p>
                      </div>
 
@@ -183,10 +204,15 @@ const VernacularEngine: React.FC<VernacularEngineProps> = ({ onNotify }) => {
                         </div>
                         <div style={{ flex: 1, minWidth: '200px' }}>
                             <div style={{ fontSize: '0.75rem', fontWeight: '900', color: 'var(--founder-primary)', letterSpacing: '0.05em', marginBottom: '0.4rem' }}>CULTURAL ANALOGY</div>
-                            <div style={{ fontSize: '1.15rem', fontWeight: '700', color: 'white' }}>{currentLang.analogy}</div>
+                            <div style={{ fontSize: '1.15rem', fontWeight: '700', color: 'white' }}>{aiContent.analogy}</div>
                         </div>
                      </motion.div>
                   </motion.div>
+                ) : (
+                  <div style={{ textAlign: 'center', color: 'var(--text-dim)' }}>
+                    <Languages size={48} style={{ marginBottom: '1rem', opacity: 0.3 }} />
+                    <p style={{ fontWeight: '700' }}>Select a paradigm to begin cultural mapping.</p>
+                  </div>
                 )}
               </AnimatePresence>
             </div>
@@ -204,7 +230,7 @@ const VernacularEngine: React.FC<VernacularEngineProps> = ({ onNotify }) => {
               flexWrap: 'wrap'
             }}>
               <motion.div
-                onClick={() => onNotify("Aura Vernacular Narration: Initiated.", "success")}
+                onClick={handleVoiceNarration}
                 whileHover={{ scale: 1.1, rotate: [0, 5, -5, 0] }}
                 whileTap={{ scale: 0.9 }}
                 style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'var(--founder-gradient)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', cursor: 'pointer', boxShadow: 'var(--shadow-lg)', flexShrink: 0 }}
