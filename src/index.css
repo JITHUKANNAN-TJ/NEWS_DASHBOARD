@@ -1,0 +1,149 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  /* Core Brand Colors (HSL for precise control) */
+  --primary-h: 161;
+  --primary-s: 84%;
+  --primary-l: 39%;
+  --primary: hsl(var(--primary-h), var(--primary-s), var(--primary-l));
+  
+  /* Persona Themes - Investor (Emerald/Teal) */
+  --investor-h: 161;
+  --investor-s: 84%;
+  --investor-primary: hsl(var(--investor-h), var(--investor-s), 39%);
+  --investor-gradient: linear-gradient(135deg, hsl(161, 84%, 39%) 0%, hsl(174, 80%, 40%) 100%);
+  --investor-bg: hsla(161, 84%, 39%, 0.08);
+  
+  /* Persona Themes - Founder (Electric Violet) */
+  --founder-h: 262;
+  --founder-s: 83%;
+  --founder-primary: hsl(var(--founder-h), var(--founder-s), 58%);
+  --founder-gradient: linear-gradient(135deg, hsl(262, 83%, 58%) 0%, hsl(280, 80%, 60%) 100%);
+  --founder-bg: hsla(262, 83%, 58%, 0.08);
+  
+  /* Persona Themes - Student (Quantum Blue) */
+  --student-h: 217;
+  --student-s: 91%;
+  --student-primary: hsl(var(--student-h), var(--student-s), 60%);
+  --student-gradient: linear-gradient(135deg, hsl(217, 91%, 60%) 0%, hsl(190, 90%, 50%) 100%);
+  --student-bg: hsla(217, 91%, 60%, 0.08);
+
+  /* Neutrals & Surfaces */
+  --bg-main: #0a0c10;
+  --bg-surface: #12151c;
+  --bg-glass: rgba(18, 21, 28, 0.7);
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+  --text-invert: #0f172a;
+  
+  /* Shadows */
+  --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+  --shadow-md: 0 12px 24px -6px rgba(0,0,0,0.3);
+  --shadow-lg: 0 20px 40px -12px rgba(0,0,0,0.5);
+}
+
+body {
+  margin: 0;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  overflow: hidden;
+}
+
+h1, h2, h3, h4, .heading {
+  font-family: 'Outfit', sans-serif;
+  letter-spacing: -0.02em;
+}
+
+/* Next-Level Glassmorphism */
+.glass-panel {
+  background: var(--bg-glass);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-md);
+}
+
+.glass-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 1.5rem;
+  transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  overflow: hidden;
+}
+
+.glass-card:hover {
+  transform: translateY(-4px) scale(1.01);
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 20px 40px -20px rgba(0,0,0,0.5);
+}
+
+/* Professional Utilities */
+.editorial-serif {
+  font-family: 'Outfit', serif;
+  font-weight: 700;
+}
+
+.text-gradient {
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.persona-accent {
+  transition: all 0.5s ease;
+}
+
+/* Custom Scrollbar (Dark Command Center Style) */
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-main);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* Cinematic Pulse */
+@keyframes pulse-gentle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(0.98); }
+}
+
+.pulse {
+  animation: pulse-gentle 3s infinite ease-in-out;
+}
+
+/* Layout Helpers */
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.grid-auto {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
