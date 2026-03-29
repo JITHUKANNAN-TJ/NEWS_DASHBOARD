@@ -124,7 +124,8 @@ const App = () => {
         zIndex: 10,
         backgroundColor: 'rgba(10, 12, 16, 0.4)',
         backdropFilter: 'blur(5px)',
-        minWidth: 0 // Prevent flex overflow
+        minWidth: 0, // Prevent flex-squashing
+        width: 0 // Force flex to calculate based on available space
       }}>
         {/* Global Top Bar */}
         <TopBar 

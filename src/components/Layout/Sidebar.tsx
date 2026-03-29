@@ -31,7 +31,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen, activeTab, setActi
       transition: { type: 'spring', damping: 25, stiffness: 120 }
     },
     closed: { 
-      width: isMobile ? 0 : '96px',
+      width: isMobile ? 0 : '88px',
       x: isMobile ? '-100%' : 0,
       transition: { type: 'spring', damping: 25, stiffness: 120 }
     }
@@ -53,7 +53,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen, activeTab, setActi
         left: 0,
         top: 0,
         zIndex: 100,
-        overflow: 'hidden'
+        overflow: 'hidden',
+        flexShrink: 0 // Prevent flex-squashing
       }}
     >
       {/* Branding Section */}
@@ -64,12 +65,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen, activeTab, setActi
         justifyContent: 'space-between',
         height: '100px',
         borderBottom: '1px solid var(--border-subtle)',
-        minWidth: '280px'
+        width: '100%' // Fluid width
       }}>
-        <motion.div 
-          animate={{ opacity: (isOpen || !isMobile) ? 1 : 0 }}
-          style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}
-        >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', minWidth: '240px' }}>
           <div style={{
             width: '40px',
             height: '40px',
@@ -79,14 +77,21 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen, activeTab, setActi
             alignItems: 'center',
             justifyContent: 'center',
             color: 'white',
-            boxShadow: '0 8px 16px -4px var(--investor-primary)'
+            boxShadow: '0 8px 16px -4px var(--investor-primary)',
+            flexShrink: 0
           }}>
             <Command size={24} />
           </div>
-          <h1 className="heading" style={{ fontWeight: '900', fontSize: '1.75rem', color: 'white', letterSpacing: '-0.05em' }}>ET 2026</h1>
-        </motion.div>
+          <motion.h1 
+            animate={{ opacity: isOpen ? 1 : 0 }}
+            className="heading" 
+            style={{ fontWeight: '900', fontSize: '1.75rem', color: 'white', letterSpacing: '-0.05em', whiteSpace: 'nowrap' }}
+          >
+            ET 2026
+          </motion.h1>
+        </div>
         
-        {isMobile && (
+        {isMobile && isOpen && (
           <motion.button
             onClick={() => setIsOpen(false)}
             whileHover={{ scale: 1.1, backgroundColor: 'rgba(255,255,255,0.05)' }}
@@ -97,7 +102,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen, activeTab, setActi
               border: '1px solid var(--border-subtle)',
               borderRadius: '0.75rem',
               cursor: 'pointer',
-              color: 'var(--text-muted)'
+              color: 'var(--text-muted)',
+              flexShrink: 0
             }}
           >
             <X size={20} />
@@ -106,7 +112,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen, activeTab, setActi
       </div>
 
       {/* Primary Navigation */}
-      <nav style={{ flex: 1, padding: '2rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', minWidth: '280px' }}>
+      <nav style={{ flex: 1, padding: '2rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', width: '100%' }}>
         {menuItems.map((item) => (
           <motion.button
             key={item.id}
@@ -129,7 +135,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen, activeTab, setActi
               color: activeTab === item.id ? 'var(--primary)' : 'var(--text-dim)',
               cursor: 'pointer',
               transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-              position: 'relative'
+              position: 'relative',
+              minWidth: '240px' // Ensures labels have space when open
             }}
           >
             <item.icon size={24} style={{ 
@@ -137,18 +144,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen, activeTab, setActi
                 color: activeTab === item.id ? 'var(--primary)' : 'inherit'
             }} />
             
-            <AnimatePresence>
-              {(isOpen || (!isMobile && isOpen)) && (
-                <motion.span 
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -10 }}
-                  style={{ fontWeight: '800', fontSize: '1rem', letterSpacing: '0.02em' }}
-                >
-                  {item.label}
-                </motion.span>
-              )}
-            </AnimatePresence>
+            <motion.span 
+              animate={{ opacity: isOpen ? 1 : 0 }}
+              style={{ fontWeight: '800', fontSize: '1rem', letterSpacing: '0.02em', whiteSpace: 'nowrap' }}
+            >
+              {item.label}
+            </motion.span>
 
             {activeTab === item.id && (
               <motion.div 
@@ -169,42 +170,42 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen, activeTab, setActi
       </nav>
 
       {/* System Status / User Section */}
-      <div style={{ padding: '2rem 1.5rem', borderTop: '1px solid var(--border-subtle)', minWidth: '280px' }}>
-        <AnimatePresence>
-          {isOpen ? (
-            <motion.div 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
-              style={{
-                backgroundColor: 'rgba(255,255,255,0.02)',
-                borderRadius: '1.5rem',
-                padding: '1.5rem',
-                border: '1px solid var(--border-subtle)'
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
-                <div style={{
-                  width: '48px',
-                  height: '48px',
-                  background: 'var(--founder-gradient)',
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'white',
-                  fontWeight: '900',
-                  boxShadow: 'var(--shadow-sm)'
-                }}>
-                  JD
-                </div>
-                <div style={{ flex: 1, overflow: 'hidden' }}>
-                    <div style={{ fontWeight: '800', fontSize: '1rem', color: 'white', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Intelligence Analyst</div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                        <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981' }} /> SYSTEM ONLINE
-                    </div>
-                </div>
+      <div style={{ padding: '2rem 1.5rem', borderTop: '1px solid var(--border-subtle)', width: '100%' }}>
+          <motion.div 
+            animate={{ opacity: isOpen ? 1 : 0.5 }}
+            style={{
+              backgroundColor: isOpen ? 'rgba(255,255,255,0.02)' : 'transparent',
+              borderRadius: '1.5rem',
+              padding: isOpen ? '1.5rem' : '0.5rem',
+              border: isOpen ? '1px solid var(--border-subtle)' : '1px solid transparent',
+              minWidth: '240px'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: isOpen ? '1.5rem' : '0' }}>
+              <div style={{
+                width: '48px',
+                height: '48px',
+                background: 'var(--founder-gradient)',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'white',
+                fontWeight: '900',
+                boxShadow: 'var(--shadow-sm)',
+                flexShrink: 0
+              }}>
+                JD
               </div>
+              <div style={{ flex: 1, opacity: isOpen ? 1 : 0 }}>
+                  <div style={{ fontWeight: '800', fontSize: '1rem', color: 'white', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Intelligence Analyst</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981' }} /> SYSTEM ONLINE
+                  </div>
+              </div>
+            </div>
+            
+            {isOpen && (
               <div style={{ display: 'flex', gap: '0.75rem' }}>
                 <motion.button whileHover={{ scale: 1.05 }} className="glass-card" style={{ flex: 1, padding: '0.75rem', fontSize: '0.8rem', fontWeight: '900', opacity: 0.5, background: 'rgba(255,255,255,0.05)', color: 'var(--text-dim)', border: 'none', borderRadius: '0.75rem', cursor: 'pointer' }}>
                   <Settings size={16} />
@@ -213,25 +214,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen, activeTab, setActi
                   <LogOut size={16} />
                 </motion.button>
               </div>
-            </motion.div>
-          ) : (
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="flex-center"
-              style={{ padding: '0.5rem' }}
-            >
-              <div style={{ 
-                width: '48px', height: '48px', borderRadius: '50%', 
-                background: 'var(--founder-gradient)', display: 'flex', 
-                alignItems: 'center', justifyContent: 'center', color: 'white', 
-                fontWeight: '900', boxShadow: 'var(--shadow-sm)'
-              }}>
-                JD
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+            )}
+          </motion.div>
       </div>
     </motion.div>
   );
