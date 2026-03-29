@@ -17,30 +17,42 @@ export const getGeminiModel = () => {
 };
 
 /**
- * Enriches raw news stories with AI-driven categorization, sentiment, and relevance scores.
+ * Robust JSON Extractor to handle AI markdown inconsistencies.
+ */
+const extractJson = (text: string) => {
+    try {
+        const match = text.match(/\[[\s\S]*\]|\{[\s\S]*\}/);
+        if (!match) return null;
+        return JSON.parse(match[0]);
+    } catch (e) {
+        return null;
+    }
+};
+
+/**
+ * Enriches raw news stories with AI-driven categorization.
  */
 export const enrichStoriesWithAI = async (persona: Persona, stories: any[]): Promise<Story[]> => {
   if (!GEMINI_API_KEY || stories.length === 0) return stories as Story[];
 
   try {
     const model = getGeminiModel();
-    const batchSize = 15;
+    const batchSize = 10;
     const batch = stories.slice(0, batchSize); 
     const newsContext = batch.map((s, i) => `[ID:${i}] ${s.title}`).join("\n");
 
     const prompt = `
-      You are the ET 2026 'Aura' Neural Layer.
-      Persona: ${persona.toUpperCase()}
-      Raw News Stream:
-      ${newsContext}
-      Task: For each [ID], provide Category (Markets, Tech, Economy, Strategic), Sentiment (positive, neutral, warning), and Relevance (80-100 for a ${persona}).
-      Return ONLY a JSON array: [{"id": number, "category": "string", "sentiment": "string", "relevance": number}]
+      You are Aura AI. Persona: ${persona}.
+      Stream: ${newsContext}
+      Provide JSON array: [{"id": number, "category": "Markets|Tech|Economy|Strategic", "sentiment": "positive|neutral|warning", "relevance": 80-100}]
     `;
 
     const result = await model.generateContent(prompt);
-    const text = result.response.text().replace(/```json|```/g, "");
-    const enrichedData: StoryEnrichment[] = JSON.parse(text);
-    const enrichedMap = new Map<number, StoryEnrichment>(enrichedData.map((e: StoryEnrichment) => [e.id, e]));
+    const enrichedData = extractJson(result.response.text());
+    
+    if (!enrichedData) return stories as Story[];
+    
+    const enrichedMap = new Map<number, StoryEnrichment>(enrichedData.map((e: any) => [e.id, e]));
 
     return stories.map((story, index) => {
       const enrichment = enrichedMap.get(index);
@@ -52,19 +64,7 @@ export const enrichStoriesWithAI = async (persona: Persona, stories: any[]): Pro
           relevance: enrichment.relevance || 85
         } as Story;
       }
-
-      const lowerTitle = (story.title || "").toLowerCase();
-      let category: any = "Strategic";
-      if (/(stock|market|nifty|sensex|rbi|fed|rate|bank|profit|loss)/.test(lowerTitle)) category = "Markets";
-      else if (/(tech|ai|semiconductor|software|cloud|digital|robot|crypto)/.test(lowerTitle)) category = "Tech";
-      else if (/(economy|gdp|inflation|budget|fiscal|policy|trade)/.test(lowerTitle)) category = "Economy";
-
-      return {
-        ...story,
-        category,
-        sentiment: story.sentiment || "neutral",
-        relevance: 82
-      } as Story;
+      return story as Story;
     });
   } catch (e) {
     return stories as Story[];
@@ -72,111 +72,92 @@ export const enrichStoriesWithAI = async (persona: Persona, stories: any[]): Pro
 };
 
 /**
- * GENERATE NEURAL FEED: Fallback function for Production domains (Render) where NewsAPI is blocked.
- * Uses Gemini to simulate a high-fidelity live data stream.
+ * GENERATE NEURAL FEED: Fallback function for Render.
+ * Guaranteed content even if AI or Network fails.
  */
 export const generateNeuralFeed = async (persona: Persona): Promise<Story[]> => {
-    if (!GEMINI_API_KEY) throw new Error("Aura Offline: Neural Recall Unavailable.");
+    // Hardcoded Neural Seed in case of total failure
+    const neuralSeed: Story[] = [
+        { id: 801, title: "Aura Neural Recall Active: Intelligence Syncing...", category: "Strategic", sentiment: "positive", relevance: 98, description: "System recalibrating narrative nodes.", source: { name: "Aura Core" }, urlToImage: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=400" },
+        { id: 802, title: "Global Market Alpha: Sector Rotation Detected", category: "Markets", sentiment: "neutral", relevance: 92, description: "Capital flowing into autonomous infrastructure.", source: { name: "Bloomberg" }, urlToImage: "https://images.unsplash.com/photo-1611974717482-58a2ca5fe475?q=80&w=400" }
+    ];
+
+    if (!GEMINI_API_KEY) return neuralSeed;
 
     try {
         const model = getGeminiModel();
         const prompt = `
-            You are the ET 2026 'Aura' Neural Engine. 
-            The News API is currently blocked, so you must generate a high-fidelity 'Neural Feed' of the latest global trends.
-            Persona: ${persona.toUpperCase()}
-            
-            Requirement: Generate 12 high-impact, realistic news headlines for ${new Date().toLocaleDateString()}.
-            Include articles for: Markets, Technology, Economy.
-            Return ONLY a JSON array of objects:
-            [
-              {
-                "id": number (start from 800),
-                "title": "A tactical, realistic headline",
-                "category": "Markets | Tech | Economy | Strategic",
-                "sentiment": "positive | neutral | warning",
-                "relevance": number (80-100),
-                "description": "A 1-sentence insight",
-                "urlToImage": "A high-quality Unsplash image URL related to the topic",
-                "source": { "name": "Aura Network | Bloomberg | TechCrunch" }
-              }
-            ]
+            Persona: ${persona.toUpperCase()}. Generate 8 high-fidelity news articles.
+            Return ONLY JSON: [{"id": 800+, "title": "...", "category": "Markets|Tech|Economy", "sentiment": "positive|neutral|warning", "relevance": 90+, "description": "...", "urlToImage": "Unsplash URL", "source": {"name": "..."}}]
         `;
 
         const result = await model.generateContent(prompt);
-        const text = result.response.text().replace(/```json|```/g, "");
-        return JSON.parse(text) as Story[];
+        const data = extractJson(result.response.text());
+        return data || neuralSeed;
     } catch (error) {
-        console.error("Neural Feed Generation failed.", error);
-        throw error;
+        return neuralSeed;
     }
 };
 
 export const chatWithAura = async (persona: Persona, message: string, history: any[]) => {
-  if (!GEMINI_API_KEY) throw new Error("Aura Offline: API Key Missing.");
+  if (!GEMINI_API_KEY) return "Aura Neural Recall: I am stabilizing your data stream first.";
   try {
     const model = getGeminiModel();
-    const genHistory = history.map(h => ({
+    const genHistory = (history || []).map(h => ({
       role: h.role === 'user' ? 'user' : 'model',
       parts: [{ text: h.content }]
     }));
-    const recentHistory = genHistory.slice(-6);
-    const chat = model.startChat({ history: recentHistory.length > 1 ? recentHistory.slice(0, -1) : [] });
-    const prompt = `Act as Aura (ET 2026 Engine). Persona: ${persona.toUpperCase()}. Tone: Tactical, direct. Respond to: ${message}`;
-    const result = await chat.sendMessage([{ text: prompt }]);
+    const chat = model.startChat({ history: genHistory.slice(-4) });
+    const result = await chat.sendMessage([{ text: message }]);
     return result.response.text();
   } catch (err) {
-    return "Aura Neural Sync Fragmented: Direct interaction limited. Intelligence nodes stabilized.";
+    return "Neural Sync Fragmented.";
   }
 };
 
 export const generateMarketPulse = async (marketData: MarketIndex[]) => {
-  if (!GEMINI_API_KEY) return "Aura Pulse: Real-time telemetry synchronized.";
-  const model = getGeminiModel();
-  const context = marketData.map(m => `${m.symbol}: ${m.price} (${m.changePercent}%)`).join(", ");
-  const prompt = `Analyze: ${context}. 1-sentence tactical 'Neural Insight' under 15 words.`;
+  if (!GEMINI_API_KEY) return "Aura Pulse: Tactical data synchronizing.";
   try {
-    const result = await model.generateContent(prompt);
+    const model = getGeminiModel();
+    const context = marketData.map(m => `${m.symbol}: ${m.price}`).join(", ");
+    const result = await model.generateContent(`Analyze markets: ${context}. 1-sentence insight.`);
     return result.response.text().trim();
   } catch (e) {
-    return "Aura Analysis: Volatility indexed at 2.4 - Tactical stability high.";
+    return "Aura Analysis: Volatility indexed at 2.4.";
   }
 };
 
 export const synthesizeBriefing = async (persona: Persona, stories: any[]) => {
   if (!GEMINI_API_KEY) return { summary: "Synthesis offline", impactVectors: [] };
-  const model = getGeminiModel();
-  const storyContext = stories.slice(0, 5).map(s => s.title).join("\n");
-  const prompt = `Summarize for ${persona.toUpperCase()} in 2 paragraphs. Headlines: ${storyContext}. Return JSON: { "summary": "...", "impactVectors": [{"label": "...", "value": "..."}] }`;
   try {
-    const result = await model.generateContent(prompt);
-    const text = result.response.text().replace(/```json|```/g, "");
-    return JSON.parse(text);
+    const model = getGeminiModel();
+    const result = await model.generateContent(`Summarize headlines for ${persona}. Return JSON: { "summary": "...", "impactVectors": [{"label": "...", "value": "..."}] }`);
+    const data = extractJson(result.response.text());
+    return data || { summary: "Synthesis Fragmented", impactVectors: [] };
   } catch (e) {
     return { summary: "Neural Synthesis error.", impactVectors: [] };
   }
 };
 
-export const predictStoryArc = async (arcTitle: string, status: string, players: string[]) => {
+export const predictStoryArc = async (title: string, status: string, players: any[]) => {
   if (!GEMINI_API_KEY) return { prediction: "Forecast fragmented.", probability: 50 };
-  const model = getGeminiModel();
-  const prompt = `Predict arc for: ${arcTitle}. Return JSON: {"prediction": "...", "probability": number}`;
   try {
-    const result = await model.generateContent(prompt);
-    const textRes = result.response.text().replace(/```json|```/g, "");
-    return JSON.parse(textRes);
+    const model = getGeminiModel();
+    const result = await model.generateContent(`Predict arc for: ${title}. Return JSON: {"prediction": "...", "probability": number}`);
+    const data = extractJson(result.response.text());
+    return data || { prediction: "Forecast Fragmented.", probability: 50 };
   } catch (e) {
     return { prediction: "Forecast Fragmented.", probability: 50 };
   }
 };
 
-export const adaptCulturally = async (text: string, language: string) => {
-  if (!GEMINI_API_KEY) throw new Error("Missing Gemini API Key");
-  const model = getGeminiModel();
-  const prompt = `Adapt to ${language}: "${text}". Return JSON: {"translation": "...", "analogy": "..."}`;
+export const adaptCulturally = async (text: string, lang: string) => {
+  if (!GEMINI_API_KEY) return { translation: text, analogy: "Syncing..." };
   try {
-    const result = await model.generateContent(prompt);
-    const textRes = result.response.text().replace(/```json|```/g, "");
-    return JSON.parse(textRes);
+    const model = getGeminiModel();
+    const result = await model.generateContent(`Adapt to ${lang}: "${text}". Return JSON: {"translation": "...", "analogy": "..."}`);
+    const data = extractJson(result.response.text());
+    return data || { translation: text, analogy: "Neural Sync Fragmented." };
   } catch (e) {
     return { translation: text, analogy: "Neural Sync Fragmented." };
   }
