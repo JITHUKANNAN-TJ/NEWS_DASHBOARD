@@ -14,10 +14,12 @@ import NewsNavigator from './components/Tabs/NewsNavigator';
 import StoryArcTracker from './components/Tabs/StoryArcTracker';
 import VideoStudio from './components/Tabs/VideoStudio';
 import VernacularEngine from './components/Tabs/VernacularEngine';
+import MarketRibbon from './components/Layout/MarketRibbon';
 
 // Shared Components
 import Toast, { ToastType } from './components/Shared/Toast';
 import ImpactModal from './components/Tabs/ImpactModal';
+import AuraTerminal from './components/Shared/AuraTerminal';
 
 const App = () => {
   const [persona, setPersona] = useState<Persona>('investor');
@@ -127,6 +129,8 @@ const App = () => {
         minWidth: 0, // Prevent flex-squashing
         width: 0 // Force flex to calculate based on available space
       }}>
+        <MarketRibbon />
+
         {/* Global Top Bar */}
         <TopBar 
           persona={persona} 
@@ -221,6 +225,9 @@ const App = () => {
           />
         )}
       </AnimatePresence>
+
+      {/* Persistent AI Interaction Terminal */}
+      <AuraTerminal persona={persona} />
     </div>
   );
 };

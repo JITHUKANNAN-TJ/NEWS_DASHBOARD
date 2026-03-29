@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   TrendingUp, 
@@ -17,7 +17,10 @@ import {
   ChevronRight,
   Globe,
   Loader2,
-  Play
+  Play,
+  BarChart3,
+  Cpu,
+  Layers
 } from 'lucide-react';
 import { Story, Persona } from '../../types';
 import { synthesizeBriefing } from '../../services/aiService';
@@ -35,6 +38,14 @@ const HomeFeed: React.FC<HomeFeedProps> = ({ persona, stories, isLoading, error,
   const [isBriefingOpen, setIsBriefingOpen] = useState(false);
   const [briefingData, setBriefingData] = useState<{ summary: string; impactVectors: any[] } | null>(null);
   const [isBriefingLoading, setIsBriefingLoading] = useState(false);
+  const [activeCategory, setActiveCategory] = useState('All');
+
+  const categories = ['All', 'Markets', 'Economy', 'Tech', 'Strategic'];
+
+  const filteredStories = useMemo(() => {
+    if (activeCategory === 'All') return stories;
+    return stories.filter(s => s.category?.toLowerCase() === activeCategory.toLowerCase());
+  }, [stories, activeCategory]);
 
   const handleLiveBriefing = async () => {
     setIsBriefingOpen(true);
@@ -66,7 +77,7 @@ const HomeFeed: React.FC<HomeFeedProps> = ({ persona, stories, isLoading, error,
     switch (persona) {
       case 'investor':
         return (
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.25rem', marginBottom: '2.5rem' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.25rem', marginBottom: '2rem' }}>
             <DashboardCard icon={<Activity size={18} />} label="Portfolio Pulse" value="+2.4%" trend="Live" color="#10b981" />
             <DashboardCard icon={<Zap size={18} />} label="Sector Volatility" value="Low" trend="-12%" color="#3b82f6" />
             <DashboardCard icon={<Target size={18} />} label="Strategic Alpha" value="94.2" trend="+1.5" color="#a855f7" />
@@ -74,7 +85,7 @@ const HomeFeed: React.FC<HomeFeedProps> = ({ persona, stories, isLoading, error,
         );
       case 'founder':
         return (
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.25rem', marginBottom: '2.5rem' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.25rem', marginBottom: '2rem' }}>
             <DashboardCard icon={<Briefcase size={18} />} label="Ecosystem Signals" value="High" trend="Critical" color="#f59e0b" />
             <DashboardCard icon={<TrendingUp size={18} />} label="Venture Velocity" value="8.4x" trend="Hot" color="#ec4899" />
             <DashboardCard icon={<Search size={18} />} label="Maverick Index" value="Elite" trend="98 pct" color="#6366f1" />
@@ -82,7 +93,7 @@ const HomeFeed: React.FC<HomeFeedProps> = ({ persona, stories, isLoading, error,
         );
       case 'student':
         return (
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.25rem', marginBottom: '2.5rem' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.25rem', marginBottom: '2rem' }}>
             <DashboardCard icon={<GraduationCap size={18} />} label="Concepts Mastery" value="78%" trend="+5% Today" color="#3b82f6" />
             <DashboardCard icon={<Search size={18} />} label="Career Pivot" value="OPEN" trend="12 Ops" color="#10b981" />
             <DashboardCard icon={<TrendingUp size={18} />} label="Learning Arc" value="STEADY" trend="Lvl 4" color="#a855f7" />
@@ -97,10 +108,10 @@ const HomeFeed: React.FC<HomeFeedProps> = ({ persona, stories, isLoading, error,
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-      style={{ display: 'flex', flexDirection: 'column', gap: '2.25rem' }}
+      style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}
     >
-      {/* Cinematic Hero Section */}
-      <section style={{ position: 'relative', minHeight: '280px', borderRadius: '3rem', overflow: 'hidden' }}>
+      {/* Tactical Header with AI Briefing */}
+      <section style={{ position: 'relative', minHeight: '260px', borderRadius: '3rem', overflow: 'hidden' }}>
         <div style={{
           position: 'absolute',
           inset: 0,
@@ -109,11 +120,11 @@ const HomeFeed: React.FC<HomeFeedProps> = ({ persona, stories, isLoading, error,
           zIndex: 0,
           boxShadow: `0 30px 80px -20px var(--${persona}-bg)`
         }} />
-        <div className="flex-center stack-mobile" style={{ height: '100%', padding: 'clamp(2rem, 5vw, 4rem)', gap: '4rem', position: 'relative', zIndex: 10, alignItems: 'center', justifyContent: 'center', textAlign: 'center', minHeight: '280px' }}>
+        <div className="flex-center stack-mobile" style={{ height: '100%', padding: 'clamp(2rem, 5vw, 4rem)', gap: '4rem', position: 'relative', zIndex: 10, alignItems: 'center', justifyContent: 'center', textAlign: 'center', minHeight: '260px' }}>
           <div style={{ flex: 1 }}>
             <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}>
                <h1 className="heading" style={{ color: 'white', fontWeight: '900', lineHeight: '1', marginBottom: '1.25rem', letterSpacing: '-0.05em', fontSize: 'clamp(2.5rem, 6vw, 4rem)' }}>
-                 Your Intel, <br/> Redefined.
+                 Intelligence Pulse.
                </h1>
                <div style={{ display: 'flex', gap: '1.25rem', justifyContent: 'center', flexWrap: 'wrap' }}>
                  <button 
@@ -121,10 +132,10 @@ const HomeFeed: React.FC<HomeFeedProps> = ({ persona, stories, isLoading, error,
                   className="glass-panel" 
                   style={{ padding: '0.85rem 1.75rem', borderRadius: '1.25rem', color: 'white', fontWeight: '900', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.75rem' }}
                 >
-                   <Sparkles size={18} /> Live Briefing
+                   <Sparkles size={18} /> Neural Synthesis
                  </button>
                  <button className="flex-center" style={{ background: 'transparent', border: 'none', color: 'white', fontWeight: '800', gap: '0.75rem', cursor: 'pointer', fontSize: '0.9rem' }}>
-                    Watch Aura <Clock size={18} />
+                    Watch Aura <Play size={16} fill="white" />
                  </button>
                </div>
             </motion.div>
@@ -132,7 +143,108 @@ const HomeFeed: React.FC<HomeFeedProps> = ({ persona, stories, isLoading, error,
         </div>
       </section>
 
-      {/* AI Briefing Modal Overlay */}
+      {/* Advanced Categorization Tabs */}
+      <div style={{ display: 'flex', gap: '1rem', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '0.5rem', overflowX: 'auto', msOverflowStyle: 'none', scrollbarWidth: 'none' }}>
+        {categories.map(cat => (
+            <button
+                key={cat}
+                onClick={() => setActiveCategory(cat)}
+                style={{
+                    padding: '0.6rem 1.5rem',
+                    borderRadius: '1rem',
+                    border: '1px solid transparent',
+                    borderColor: activeCategory === cat ? 'var(--primary)' : 'transparent',
+                    background: activeCategory === cat ? 'rgba(16, 185, 129, 0.05)' : 'none',
+                    color: activeCategory === cat ? 'var(--primary)' : 'var(--text-dim)',
+                    fontWeight: '900',
+                    fontSize: '0.85rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    whiteSpace: 'nowrap',
+                    letterSpacing: '0.05em'
+                }}
+            >
+                {cat.toUpperCase()}
+            </button>
+        ))}
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 800px), 1fr))', gap: '3rem' }}>
+        {/* Main Stream Area */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+            <section>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem' }}>
+                    <div style={{ width: '4px', height: '1.5rem', background: 'var(--primary)', borderRadius: '2px' }} />
+                    <h2 className="heading" style={{ fontSize: '1.5rem', fontWeight: '900', color: 'white' }}>Intelligence Dashboard</h2>
+                </div>
+                {renderDashboard()}
+            </section>
+
+            <section style={{ flex: 1 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <div style={{ width: '4px', height: '1.5rem', background: 'var(--investor-primary)', borderRadius: '2px' }} />
+                        <h2 className="heading" style={{ fontSize: '1.5rem', fontWeight: '900', color: 'white' }}>{activeCategory} Intelligence</h2>
+                    </div>
+                </div>
+
+                {isLoading ? (
+                    <div className="flex-center" style={{ padding: '5rem 0', flexDirection: 'column', gap: '1.5rem' }}>
+                        <Activity className="spin text-primary" size={48} />
+                        <span style={{ fontWeight: '900', letterSpacing: '0.1em', opacity: 0.5 }}>SYNCHRONIZING {activeCategory.toUpperCase()}...</span>
+                    </div>
+                ) : error ? (
+                    <div className="glass-panel" style={{ padding: '3rem', borderRadius: '2rem', textAlign: 'center' }}>
+                        <p style={{ color: '#ef4444', fontWeight: '900' }}>{error}</p>
+                    </div>
+                ) : (
+                    <div className="grid-responsive">
+                    {filteredStories.map((story, i) => (
+                        <motion.div
+                            key={i}
+                            initial={{ opacity: 0, y: 15 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.08 * i }}
+                            whileHover={{ y: -6 }}
+                            onClick={() => onAnalyze(story)}
+                            className="glass-card"
+                            style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', background: 'rgba(255,255,255,0.01)' }}
+                        >
+                        <div style={{ height: '180px', width: '100%', position: 'relative', overflow: 'hidden' }}>
+                            <img src={story.urlToImage || `https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=800&auto=format&fit=crop`} alt={story.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            
+                            <div style={{ position: 'absolute', top: '0.75rem', left: '0.75rem', display: 'flex', gap: '0.5rem' }}>
+                                <div style={{ padding: '0.3rem 0.6rem', background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', borderRadius: '0.5rem', color: 'white', fontSize: '0.65rem', fontWeight: '900', letterSpacing: '0.05em' }}>
+                                    {story.source.name.toUpperCase()}
+                                </div>
+                            </div>
+
+                            <div style={{ position: 'absolute', bottom: '0.75rem', right: '0.75rem' }}>
+                                <div style={{ padding: '0.4rem 0.8rem', background: 'var(--primary-gradient)', borderRadius: '0.75rem', color: 'white', fontSize: '0.65rem', fontWeight: '900', display: 'flex', alignItems: 'center', gap: '0.4rem', boxShadow: '0 10px 20px rgba(0,0,0,0.3)' }}>
+                                    <Play size={10} fill="white" /> AI SHORT
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                            <h3 style={{ fontSize: '1.15rem', fontWeight: '900', lineHeight: '1.25', color: 'white' }}>{story.title}</h3>
+                            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', lineHeight: '1.4', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', fontWeight: '500' }}>{story.description}</p>
+                            
+                            <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '0.75rem' }}>
+                                <div style={{ color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: '900', fontSize: '0.75rem', letterSpacing: '0.05em' }}>
+                                    DEEP ANALYSIS <ArrowUpRight size={14} />
+                                </div>
+                                <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: '800' }}>{story.relevance}% MATCH</div>
+                            </div>
+                        </div>
+                        </motion.div>
+                    ))}
+                    </div>
+                )}
+            </section>
+        </div>
+      </div>
+
       <AnimatePresence>
         {isBriefingOpen && (
           <motion.div 
@@ -194,81 +306,6 @@ const HomeFeed: React.FC<HomeFeedProps> = ({ persona, stories, isLoading, error,
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Personalized Dashboard */}
-      <section>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem' }}>
-            <div style={{ width: '4px', height: '1.5rem', background: 'var(--primary)', borderRadius: '2px' }} />
-            <h2 className="heading" style={{ fontSize: '1.5rem', fontWeight: '900', color: 'white' }}>Intelligence Dashboard</h2>
-        </div>
-        {renderDashboard()}
-      </section>
-
-      {/* Main Feed */}
-      <section style={{ flex: 1 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <div style={{ width: '4px', height: '1.5rem', background: 'var(--investor-primary)', borderRadius: '2px' }} />
-                <h2 className="heading" style={{ fontSize: '1.5rem', fontWeight: '900', color: 'white' }}>Intelligence Stream</h2>
-            </div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: '900', letterSpacing: '0.05em' }}>FILTERED FOR {persona.toUpperCase()}</div>
-        </div>
-
-        {isLoading ? (
-          <div className="flex-center" style={{ padding: '5rem 0', flexDirection: 'column', gap: '1.5rem' }}>
-            <Activity className="spin text-primary" size={48} />
-            <span style={{ fontWeight: '900', letterSpacing: '0.1em', opacity: 0.5 }}>SYNCHRONIZING INTEL...</span>
-          </div>
-        ) : error ? (
-          <div className="glass-panel" style={{ padding: '3rem', borderRadius: '2rem', textAlign: 'center' }}>
-             <p style={{ color: '#ef4444', fontWeight: '900' }}>{error}</p>
-          </div>
-        ) : (
-          <div className="grid-responsive">
-            {stories.map((story, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.08 * i }}
-                whileHover={{ y: -6 }}
-                onClick={() => onAnalyze(story)}
-                className="glass-card"
-                style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', background: 'rgba(255,255,255,0.01)' }}
-              >
-                <div style={{ height: '180px', width: '100%', position: 'relative', overflow: 'hidden' }}>
-                   <img src={story.urlToImage || `https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=800&auto=format&fit=crop`} alt={story.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                   
-                   <div style={{ position: 'absolute', top: '0.75rem', left: '0.75rem', display: 'flex', gap: '0.5rem' }}>
-                    <div style={{ padding: '0.3rem 0.6rem', background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', borderRadius: '0.5rem', color: 'white', fontSize: '0.65rem', fontWeight: '900', letterSpacing: '0.05em' }}>
-                        {story.source.name.toUpperCase()}
-                    </div>
-                   </div>
-
-                   {/* AI Short Trigger (Hackathon Point 5) */}
-                   <div style={{ position: 'absolute', bottom: '0.75rem', right: '0.75rem' }}>
-                        <div style={{ padding: '0.4rem 0.8rem', background: 'var(--primary-gradient)', borderRadius: '0.75rem', color: 'white', fontSize: '0.65rem', fontWeight: '900', display: 'flex', alignItems: 'center', gap: '0.4rem', boxShadow: '0 10px 20px rgba(0,0,0,0.3)' }}>
-                            <Play size={10} fill="white" /> AI SHORT
-                        </div>
-                   </div>
-                </div>
-
-                <div style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                   <h3 style={{ fontSize: '1.15rem', fontWeight: '900', lineHeight: '1.25', color: 'white' }}>{story.title}</h3>
-                   <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', lineHeight: '1.4', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', fontWeight: '500' }}>{story.description}</p>
-                   
-                   <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '0.75rem' }}>
-                      <div style={{ color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: '900', fontSize: '0.75rem', letterSpacing: '0.05em' }}>
-                         DEEP ANALYSIS <ArrowUpRight size={14} />
-                      </div>
-                      <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: '800' }}>{story.relevance}% MATCH</div>
-                   </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        )}
-      </section>
     </motion.div>
   );
 };
