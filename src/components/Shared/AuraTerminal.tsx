@@ -13,6 +13,7 @@ import {
   Loader2
 } from 'lucide-react';
 import { Persona } from '../../types';
+import { chatWithAura } from '../../services/aiService';
 
 interface AuraTerminalProps {
   persona: Persona;
@@ -35,28 +36,22 @@ const AuraTerminal: React.FC<AuraTerminalProps> = ({ persona }) => {
   }, [messages, isTyping]);
 
   const handleSend = async () => {
-    if (!input.trim()) return;
+    if (!input.trim() || isTyping) return;
     
     const userMsg = input;
     setInput('');
-    setMessages(prev => [...prev, { role: 'user', content: userMsg }]);
+    const newMessages = [...messages, { role: 'user' as const, content: userMsg }];
+    setMessages(newMessages);
     setIsTyping(true);
 
-    // Mock AI Response logic (for hackathon stability)
-    // In production, this would call aiService.ts/Gemini
-    setTimeout(() => {
-        let response = "";
-        if (userMsg.toLowerCase().includes('market')) {
-            response = "Market Synthesis: Analysis shows short-term volatility in the Tech sector, but long-term accumulation remains steady. Recommend monitoring institutional flow.";
-        } else if (userMsg.toLowerCase().includes('nifty')) {
-            response = "Nifty 50 analysis detects a support level at 24,200. Aura Neural predicts a potential 0.5% breakout if global yields stabilize.";
-        } else {
-            response = `Interesting perspective. From a ${persona} standpoint, this narrative suggests emerging alpha in adjacent sectors. Shall I run a deep-dive?`;
-        }
-        
-        setMessages(prev => [...prev, { role: 'aura', content: response }]);
+    try {
+        const response = await chatWithAura(persona, userMsg, newMessages);
+        setMessages(prev => [...prev, { role: 'aura' as const, content: response }]);
+    } catch (err) {
+        setMessages(prev => [...prev, { role: 'aura' as const, content: "Neural Recon Failure: Connection lost to global intelligence stream. Re-syncing..." }]);
+    } finally {
         setIsTyping(false);
-    }, 1500);
+    }
   };
 
   return (

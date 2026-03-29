@@ -1,40 +1,34 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { TrendingUp, TrendingDown, Zap, Globe, ShieldCheck, Activity } from 'lucide-react';
+import { TrendingUp, TrendingDown, Zap, Globe, ShieldCheck, Activity, Loader2 } from 'lucide-react';
 import { MarketIndex, fetchMarketIndices } from '../../services/marketService';
+import { generateMarketPulse } from '../../services/aiService';
 
 const MarketRibbon: React.FC = () => {
   const [marketData, setMarketData] = useState<MarketIndex[]>([]);
-  const [pulseIndex, setPulseIndex] = useState(0);
+  const [currentInsight, setCurrentInsight] = useState("Aura Pulse: Real-time telemetry synchronized.");
+  const [isSyncing, setIsSyncing] = useState(false);
 
   const fetchIndices = async () => {
     try {
       const data = await fetchMarketIndices();
       setMarketData(data);
+      
+      // Every time we get new market data, we ask Gemini for a 1-sentence tactical pulse
+      setIsSyncing(true);
+      const insight = await generateMarketPulse(data);
+      setCurrentInsight(insight);
     } catch (error) {
        console.error("Market-Sense Pulse Lost.");
+    } finally {
+      setIsSyncing(false);
     }
   };
 
   useEffect(() => {
     fetchIndices();
-    const interval = setInterval(fetchIndices, 30000); // 30s Polling
+    const interval = setInterval(fetchIndices, 60000); // 1-minute Polling to balance cost/speed
     return () => clearInterval(interval);
-  }, []);
-
-  const neuralInsights = [
-    "Aura Pulse: Heavy accumulation in Midcap FinTech.",
-    "System Alert: Sentiment divergence in IT stocks.",
-    "Aura Analysis: Bullish breakout expected in PSU banks.",
-    "Volatility Check: Indexed at 2.4 - Tactical stability high.",
-    "Global Sync: US/INR Correlation shifting - Watch Q4 trends."
-  ];
-
-  useEffect(() => {
-    const pulseInterval = setInterval(() => {
-      setPulseIndex((prev) => (prev + 1) % neuralInsights.length);
-    }, 10000); // 10s Insight Rotation
-    return () => clearInterval(pulseInterval);
   }, []);
 
   if (marketData.length === 0) return null;
@@ -62,20 +56,24 @@ const MarketRibbon: React.FC = () => {
         gap: '1rem',
         flexShrink: 0,
         color: 'var(--primary)',
-        width: 'min(100%, 450px)',
+        width: 'min(100%, 480px)',
         position: 'relative',
         zIndex: 10
       }}>
-        <div className="pulse" style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--primary)', boxShadow: '0 0 10px var(--primary)' }} />
+        <div style={{ position: 'relative' }}>
+            <div className="pulse" style={{ width: '8px', height: '8px', borderRadius: '50%', background: isSyncing ? '#a855f7' : 'var(--primary)', boxShadow: `0 0 10px ${isSyncing ? '#a855f7' : 'var(--primary)'}` }} />
+            {isSyncing && <Loader2 size={12} className="spin" style={{ position: 'absolute', top: -2, left: -2, color: '#a855f7' }} />}
+        </div>
+        
         <AnimatePresence mode="wait">
           <motion.div
-            key={pulseIndex}
+            key={currentInsight}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             style={{ fontSize: '0.85rem', fontWeight: '800', fontStyle: 'italic', letterSpacing: '0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
           >
-            {neuralInsights[pulseIndex]}
+            {isSyncing ? "AURA IS ANALYZING GLOBAL VOLATILITY..." : currentInsight}
           </motion.div>
         </AnimatePresence>
       </div>
@@ -132,7 +130,7 @@ const MarketRibbon: React.FC = () => {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: 'var(--text-dim)' }}>
             <Globe size={16} />
-            <span style={{ fontSize: '0.75rem', fontWeight: '800' }}>NEURAL RECALL: 98%</span>
+            <span style={{ fontSize: '0.75rem', fontWeight: '800' }}>NEURAL RECALL: ACTIVE</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: 'var(--primary)' }}>
             <Activity size={16} className="pulse" />

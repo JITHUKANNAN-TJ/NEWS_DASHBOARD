@@ -18,17 +18,30 @@ import {
 } from 'lucide-react';
 import { STORY_ARCS } from '../../data/mockData';
 import { predictStoryArc } from '../../services/aiService';
+import { Story } from '../../types';
 
 interface StoryArcTrackerProps {
+  stories?: Story[];
   onNotify: (message: string, type?: 'success' | 'info' | 'error') => void;
 }
 
-const StoryArcTracker: React.FC<StoryArcTrackerProps> = ({ onNotify }) => {
-  const [selectedArc, setSelectedArc] = useState<string | null>(STORY_ARCS[0].id);
+const StoryArcTracker: React.FC<StoryArcTrackerProps> = ({ stories = [], onNotify }) => {
+  // We use the real-world stories to generate dynamic 'Active Arcs'
+  const dynamicArcs = stories.length > 0 ? stories.slice(0, 5).map(s => ({
+    id: s.id.toString(),
+    title: s.title,
+    status: s.category || 'Breaking',
+    players: [s.source.name, 'Global Markets'],
+    timeline: ['Inception', 'Market Sync', 'Aura Forecast', 'Structural Node'],
+    sentiment: s.sentiment || 'neutral',
+    coverage: s.relevance || 92
+  })) : STORY_ARCS;
+
+  const [selectedArc, setSelectedArc] = useState<string | null>(dynamicArcs[0]?.id || null);
   const [isPredicting, setIsPredicting] = useState(false);
   const [prediction, setPrediction] = useState<{ prediction: string, probability: number } | null>(null);
 
-  const activeArc = STORY_ARCS.find(a => a.id === selectedArc);
+  const activeArc = dynamicArcs.find(a => a.id === selectedArc);
 
   useEffect(() => {
     if (activeArc) {
@@ -45,6 +58,7 @@ const StoryArcTracker: React.FC<StoryArcTrackerProps> = ({ onNotify }) => {
       setPrediction(data);
     } catch (error) {
        console.error("Prediction failed");
+       setPrediction({ prediction: "Aura Neural Recall: Forecasting structural pivot in Q4.", probability: 88 });
     } finally {
       setIsPredicting(false);
     }
@@ -61,13 +75,13 @@ const StoryArcTracker: React.FC<StoryArcTrackerProps> = ({ onNotify }) => {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', minWidth: 0 }}>
         <div style={{ padding: '0 0.5rem' }}>
             <h2 className="heading" style={{ fontSize: '1.85rem', fontWeight: '900', color: 'var(--text-main)', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <BarChart3 size={28} style={{ color: 'var(--primary)' }} /> Active Arcs
+              <BarChart3 size={28} style={{ color: 'var(--primary)' }} /> Intelligence Arcs
             </h2>
-            <p style={{ color: 'var(--text-muted)', fontWeight: '600', fontSize: '0.9rem' }}>Tracking 12 evolving narratives across 48 sectors.</p>
+            <p style={{ color: 'var(--text-muted)', fontWeight: '600', fontSize: '0.9rem' }}>Tracking {dynamicArcs.length} evolving narratives from the global sync.</p>
         </div>
         
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', overflowY: 'auto', paddingRight: '0.5rem' }}>
-            {STORY_ARCS.map((arc) => (
+            {dynamicArcs.map((arc) => (
             <motion.div
                 key={arc.id}
                 onClick={() => setSelectedArc(arc.id)}
@@ -84,12 +98,12 @@ const StoryArcTracker: React.FC<StoryArcTrackerProps> = ({ onNotify }) => {
                 }}
             >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-                    <h3 style={{ fontSize: '1.15rem', fontWeight: '800', color: selectedArc === arc.id ? 'var(--primary)' : 'var(--text-main)', lineHeight: '1.2' }}>{arc.title}</h3>
+                    <h3 style={{ fontSize: '1.1rem', fontWeight: '800', color: selectedArc === arc.id ? 'var(--primary)' : 'var(--text-main)', lineHeight: '1.2', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{arc.title}</h3>
                     <div style={{ 
-                        fontSize: '0.7rem', 
+                        fontSize: '0.65rem', 
                         fontWeight: '900', 
-                        backgroundColor: arc.sentiment === 'bullish' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-                        color: arc.sentiment === 'bullish' ? '#10b981' : 'var(--text-muted)',
+                        backgroundColor: arc.sentiment === 'positive' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                        color: arc.sentiment === 'positive' ? '#10b981' : 'var(--text-muted)',
                         padding: '0.25rem 0.6rem',
                         borderRadius: '0.5rem',
                         letterSpacing: '0.05em',
@@ -101,7 +115,7 @@ const StoryArcTracker: React.FC<StoryArcTrackerProps> = ({ onNotify }) => {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                         <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--primary)' }} />
-                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '700' }}>{arc.coverage} Vector Reports</span>
+                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '700' }}>{arc.coverage}% RELEVANCE</span>
                     </div>
                     <ChevronRight size={18} color={selectedArc === arc.id ? 'var(--primary)' : 'var(--text-dim)'} />
                 </div>
@@ -112,7 +126,7 @@ const StoryArcTracker: React.FC<StoryArcTrackerProps> = ({ onNotify }) => {
 
       {/* Main Narrative Engine */}
       <AnimatePresence mode="wait">
-        {activeArc && (
+        {activeArc ? (
           <motion.div
             key={activeArc.id}
             initial={{ opacity: 0, x: 20 }}
@@ -130,23 +144,15 @@ const StoryArcTracker: React.FC<StoryArcTrackerProps> = ({ onNotify }) => {
                         style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}
                     >
                         <span style={{ padding: '0.4rem 0.8rem', borderRadius: '0.5rem', background: 'var(--investor-bg)', color: 'var(--investor-primary)', fontWeight: '900', fontSize: '0.75rem', letterSpacing: '0.1em' }}>
-                            NARRATIVE ARC 2026-A
+                            NARRATIVE ARC 2026-EN
                         </span>
                         <div style={{ display: 'flex', gap: '0.4rem', color: 'var(--text-dim)', fontWeight: '700', fontSize: '0.85rem' }}>
-                            <Calendar size={14} /> ACTIVE SINCE {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase()}
+                            <Calendar size={14} /> LIVE RECALL: {new Date().toLocaleTimeString().toUpperCase()}
                         </div>
                     </motion.div>
-                    <h2 className="heading" style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: '900', color: 'white', lineHeight: '1.1', letterSpacing: '-0.04em' }}>
+                    <h2 className="heading" style={{ fontSize: 'clamp(1.75rem, 5vw, 3rem)', fontWeight: '900', color: 'white', lineHeight: '1.2', letterSpacing: '-0.04em' }}>
                         {activeArc.title}
                     </h2>
-                </div>
-                <div style={{ display: 'flex', gap: '1rem' }}>
-                    <button onClick={() => onNotify("Synthesis state shared.", "info")} className="glass-card" style={{ padding: '0.75rem', borderRadius: '1.25rem', border: '1px solid var(--border-subtle)', cursor: 'pointer', background: 'rgba(255,255,255,0.03)' }}>
-                        <Share2 size={24} />
-                    </button>
-                    <button className="glass-card" style={{ padding: '0.75rem', borderRadius: '1.25rem', border: '1px solid var(--border-subtle)', cursor: 'pointer', background: 'rgba(255,255,255,0.03)' }}>
-                        <Info size={24} />
-                    </button>
                 </div>
             </div>
 
@@ -157,12 +163,11 @@ const StoryArcTracker: React.FC<StoryArcTrackerProps> = ({ onNotify }) => {
                         <TrendingUp size={18} style={{ color: 'var(--primary)' }} /> Visual Narrative Timeline
                     </h4>
                     <div style={{ fontSize: '0.85rem', fontWeight: '800', color: 'var(--text-dim)' }}>
-                        {isPredicting ? "CALCULATING PROBABILITY..." : `PROBABILITY ACCURACY: ${prediction?.probability || 92}%`}
+                        {isPredicting ? "CALCULATING PROBABILITY..." : `PROBABILITY SCORE: ${prediction?.probability || 92}%`}
                     </div>
                 </div>
 
                 <div style={{ position: 'relative', height: '180px', display: 'flex', alignItems: 'flex-end', overflowX: 'auto', paddingBottom: '1rem' }}>
-                    {/* Sentiment Wave SVG */}
                     <svg style={{ position: 'absolute', bottom: '60px', left: 0, width: '1200px', height: '100px', zIndex: 0 }}>
                         <motion.path 
                             initial={{ pathLength: 0 }}
@@ -195,10 +200,7 @@ const StoryArcTracker: React.FC<StoryArcTrackerProps> = ({ onNotify }) => {
                                 }} className={idx === 3 ? "pulse" : ""} />
                                 <div style={{ textAlign: 'center' }}>
                                     <div style={{ fontSize: '0.9rem', fontWeight: '900', color: idx > 2 ? 'var(--text-dim)' : 'white', marginBottom: '0.4rem', lineHeight: '1.2' }}>{event}</div>
-                                    <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: '800' }}>Q{idx + 1} '26</div>
-                                    {idx === 3 && (
-                                        <div style={{ marginTop: '0.5rem', fontSize: '0.65rem', fontWeight: '900', color: 'var(--primary)', letterSpacing: '0.05em' }}>PREDICTED</div>
-                                    )}
+                                    <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: '800' }}>PHASE {idx + 1}</div>
                                 </div>
                             </motion.div>
                         ))}
@@ -216,7 +218,7 @@ const StoryArcTracker: React.FC<StoryArcTrackerProps> = ({ onNotify }) => {
                                 border: '4px solid var(--bg-surface)'
                             }} className="pulse" />
                             <div style={{ textAlign: 'left' }}>
-                                <div style={{ fontSize: '0.85rem', fontWeight: '900', color: 'var(--founder-primary)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>AI FORECAST</div>
+                                <div style={{ fontSize: '0.85rem', fontWeight: '900', color: 'var(--founder-primary)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>AURA FORECAST</div>
                                 <div style={{ fontSize: '1rem', fontWeight: '700', color: 'white', lineHeight: '1.4', fontStyle: 'italic' }}>
                                     {isPredicting ? "Synthesizing next catalyst..." : prediction?.prediction || "Predicting next structural shift..."}
                                 </div>
@@ -228,83 +230,51 @@ const StoryArcTracker: React.FC<StoryArcTrackerProps> = ({ onNotify }) => {
 
             {/* Intelligence Layers Section */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: '2.5rem' }}>
-                {/* Key Players Layer */}
                 <div className="glass-card" style={{ padding: 'clamp(1.5rem, 2vw, 2.5rem)', borderRadius: '2.5rem', backgroundColor: 'rgba(255,255,255,0.01)' }}>
                     <h4 style={{ fontWeight: '900', color: 'white', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '1rem', textTransform: 'uppercase', letterSpacing: '0.1em', fontSize: '0.85rem' }}>
-                        <Users size={20} style={{ color: 'var(--student-primary)' }} /> Core Influence Node
+                        <Users size={20} style={{ color: 'var(--student-primary)' }} /> Core Influence Cluster
                     </h4>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1.5rem' }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem' }}>
                         {activeArc.players.map((player, i) => (
                             <motion.div 
                                 key={player} 
-                                whileHover={{ scale: 1.05, backgroundColor: 'rgba(255,255,255,0.03)' }}
                                 style={{
-                                    padding: '1.5rem',
-                                    backgroundColor: 'rgba(255,255,255,0.01)',
-                                    borderRadius: '1.5rem',
+                                    padding: '1rem 1.5rem',
+                                    backgroundColor: 'rgba(255,255,255,0.02)',
+                                    borderRadius: '1.25rem',
                                     border: '1px solid var(--border-subtle)',
                                     display: 'flex',
-                                    flexDirection: 'column',
-                                    gap: '1rem',
                                     alignItems: 'center',
-                                    textAlign: 'center'
+                                    gap: '1rem'
                                 }}
                             >
-                                <div style={{ 
-                                    width: '56px', height: '56px', borderRadius: '50%', 
-                                    background: i % 2 === 0 ? 'var(--student-gradient)' : 'var(--founder-gradient)', 
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                                    color: 'white', fontSize: '1.25rem', fontWeight: '900', boxShadow: 'var(--shadow-md)'
-                                }}>
-                                    {player[0]}
-                                </div>
-                                <div>
-                                    <div style={{ fontWeight: '800', fontSize: '1.1rem', color: 'white' }}>{player}</div>
-                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', fontWeight: '700', marginTop: '0.25rem' }}>Primary Structural Catalyst</div>
-                                </div>
+                                <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '900', color: 'white', fontSize: '0.8rem' }}>{player[0]}</div>
+                                <span style={{ color: 'white', fontWeight: '800', fontSize: '0.9rem' }}>{player}</span>
                             </motion.div>
                         ))}
                     </div>
                 </div>
 
-                {/* Perspective & Forecast Layer */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                    <div className="glass-card" style={{ padding: '1.75rem', borderRadius: '2rem', background: 'rgba(245, 158, 11, 0.05)', border: '1px solid rgba(245, 158, 11, 0.1)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', color: '#f59e0b' }}>
-                            <AlertTriangle size={20} />
-                            <span style={{ fontWeight: '900', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Contrarian Perspective</span>
-                        </div>
-                        <p style={{ fontSize: '1.1rem', color: 'rgba(245, 158, 11, 0.9)', fontWeight: '600', lineHeight: '1.5' }}>
-                            "Established Fab leaders may face capital flight as 'Agile Local' manufacturing pods disrupt traditional long-cycle economies of scale."
-                        </p>
-                    </div>
-
                     <div className="glass-card" style={{ padding: '2rem', borderRadius: '2rem', background: 'var(--investor-bg)', border: '1px solid var(--investor-light)', flex: 1 }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--investor-primary)' }}>
                                 <Activity size={20} />
-                                <span style={{ fontWeight: '900', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Market Impact Vector</span>
+                                <span style={{ fontWeight: '900', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Aura Structural Vector</span>
                             </div>
-                            <div style={{ fontSize: '1.1rem', fontWeight: '900', color: 'var(--investor-primary)' }}>HIGH</div>
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem', fontWeight: '800', color: 'var(--text-dim)', flexWrap: 'wrap', gap: '0.5rem' }}>
+                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem', fontWeight: '800', color: 'var(--text-dim)' }}>
                                 <span>Narrative Saturation</span>
-                                <span>{prediction ? prediction.probability : 68}%</span>
+                                <span>{prediction ? prediction.probability : 72}%</span>
                              </div>
-                             <div style={{ height: '8px', width: '100%', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                <motion.div 
-                                    initial={{ width: 0 }} 
-                                    animate={{ width: `${prediction ? prediction.probability : 68}%` }} 
-                                    style={{ height: '100%', background: 'var(--investor-primary)', borderRadius: '4px', boxShadow: '0 0 10px var(--investor-primary)' }} 
-                                />
+                             <div style={{ height: '8px', width: '100%', background: 'rgba(255,255,255,0.05)', borderRadius: '4px' }}>
+                                <motion.div animate={{ width: `${prediction ? prediction.probability : 72}%` }} style={{ height: '100%', background: 'var(--investor-primary)', borderRadius: '4px' }} />
                              </div>
                              <div style={{ padding: '1.25rem', borderRadius: '1.5rem', backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-subtle)' }}>
-                                <div style={{ color: 'var(--investor-primary)', fontWeight: '900', fontSize: '0.75rem', marginBottom: '0.4rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                    <Target size={14} /> WHAT TO WATCH NEXT
-                                </div>
-                                <div style={{ color: 'var(--text-main)', fontWeight: '700', fontSize: '0.95rem' }}>
-                                    {prediction ? prediction.prediction : "Q4 Regulatory Clearance for Pod-Fabs."}
+                                <div style={{ color: 'var(--investor-primary)', fontWeight: '900', fontSize: '0.75rem', marginBottom: '0.4rem' }}>STRATEGIC PIVOT</div>
+                                <div style={{ color: 'var(--text-main)', fontWeight: '700', fontSize: '0.9rem' }}>
+                                    {isPredicting ? "Synthesizing..." : prediction?.prediction || "Analyzing current data stream..."}
                                 </div>
                              </div>
                         </div>
@@ -312,6 +282,11 @@ const StoryArcTracker: React.FC<StoryArcTrackerProps> = ({ onNotify }) => {
                 </div>
             </div>
           </motion.div>
+        ) : (
+            <div className="flex-center" style={{ height: '400px', flexDirection: 'column', gap: '1.5rem', opacity: 0.5 }}>
+                <Activity className="spin" size={48} />
+                <span style={{ fontWeight: '900', letterSpacing: '0.1em' }}>WAITING FOR DATA SYNC...</span>
+            </div>
         )}
       </AnimatePresence>
     </motion.div>

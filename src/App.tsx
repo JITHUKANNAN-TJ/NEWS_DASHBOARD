@@ -173,6 +173,7 @@ const App = () => {
               )}
               {activeTab === 'storyarc' && (
                 <StoryArcTracker 
+                  stories={stories}
                   onNotify={showToast}
                 />
               )}

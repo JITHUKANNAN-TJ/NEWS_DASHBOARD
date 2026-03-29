@@ -1,235 +1,83 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Search, 
-  Brain, 
-  Sparkles, 
-  Zap, 
-  ArrowRight, 
-  CheckCircle2, 
-  BarChart3, 
-  ShieldCheck, 
-  Globe, 
-  Cpu,
-  ChevronRight,
-  TrendingUp,
-  Activity,
-  TrendingDown
-} from 'lucide-react';
-import { Story, Persona } from '../../types';
-import { synthesizeBriefing } from '../../services/aiService';
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Compass, Search, Sparkles, Zap, ChevronRight, Loader2, ShieldCheck, Clock, Layers } from "lucide-react";
+import { Story, Persona } from "../../types";
+import { synthesizeBriefing } from "../../services/aiService";
 
 interface NewsNavigatorProps {
   stories: Story[];
   persona: Persona;
-  onNotify: (message: string, type?: 'success' | 'info' | 'error') => void;
+  onNotify: (message: string, type?: "success" | "info" | "error") => void;
 }
 
-const NewsNavigator: React.FC<NewsNavigatorProps> = ({ stories, persona, onNotify }) => {
+const NewsNavigator: React.FC<NewsNavigatorProps> = ({ stories = [], persona, onNotify }) => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [activeCategory, setActiveCategory] = useState("All");
   const [isSynthesizing, setIsSynthesizing] = useState(false);
-  const [synthStep, setSynthStep] = useState(0);
-  const [aiData, setAiData] = useState<{ summary: string; impactVectors: any[] } | null>(null);
+  const [intelligenceReport, setIntelligenceReport] = useState<any>(null);
 
-  const synthSteps = [
-    { name: "Narrative Synthesis", icon: Brain, detail: "Deep-mapping global intelligence vectors..." },
-    { name: "Structural Mapping", icon: Cpu, detail: "Identifying market-altering catalyst nodes..." },
-    { name: "Strategic Evaluation", icon: ShieldCheck, detail: "Assessing structural risk & impact alpha..." }
-  ];
+  const categories = ["All", "Markets", "Tech", "Economy", "Strategic"];
+
+  const filteredStories = (stories || []).filter((story: any) => {
+    const title = (story.title || "").toLowerCase();
+    const desc = (story.description || "").toLowerCase();
+    const matchesSearch = title.includes(searchTerm.toLowerCase()) || desc.includes(searchTerm.toLowerCase());
+    const matchesCategory = activeCategory === "All" || (story.category || "Strategic") === activeCategory;
+    return matchesSearch && matchesCategory;
+  });
 
   const handleSynthesize = async () => {
+    if (filteredStories.length === 0) return onNotify("No signals detected.", "error");
     setIsSynthesizing(true);
-    setSynthStep(0);
-    setAiData(null);
-    
-    // Simulate multi-stage visual process but perform real AI in background
-    const visualInterval = setInterval(() => {
-      setSynthStep(prev => (prev < synthSteps.length - 1 ? prev + 1 : prev));
-    }, 2000);
-
     try {
-      const data = await synthesizeBriefing(persona, stories);
-      
-      clearInterval(visualInterval);
-      setSynthStep(synthSteps.length - 1);
-      
-      setTimeout(() => {
-        setAiData(data);
-        setIsSynthesizing(false);
-        onNotify("Intelligence Briefing: Strategic Layer Online.", "success");
-      }, 1500);
-    } catch (error) {
-      clearInterval(visualInterval);
+      const report = await synthesizeBriefing(persona, filteredStories.slice(0, 10));
+      setIntelligenceReport(report);
+    } catch (e) {
+      onNotify("Aura Offline", "error");
+    } finally {
       setIsSynthesizing(false);
-      onNotify("AI Synthesis failed. Check API configuration.", "error");
     }
   };
 
-  const getIcon = (name: string) => {
-    const icons: any = { 
-        'trending-up': TrendingUp, 
-        'globe': Globe, 
-        'zap': Zap, 
-        'activity': Activity,
-        'trending-down': TrendingDown 
-    };
-    const IconComp = icons[name] || Activity;
-    return <IconComp size={18} />;
-  };
-
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="glass-panel"
-      style={{
-        padding: 'clamp(1rem, 3vw, 3.5rem)',
-        borderRadius: '3rem',
-        minHeight: '85vh',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '2.5rem',
-        backgroundColor: 'rgba(10, 12, 16, 0.4)',
-        boxShadow: '0 40px 100px -20px rgba(0,0,0,0.5)'
-      }}
-    >
-      {/* Cinematic Header */}
-      <div className="stack-mobile" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-          <div style={{
-            width: '80px',
-            height: '80px',
-            borderRadius: '2rem',
-            background: 'var(--founder-gradient)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'white',
-            boxShadow: '0 20px 40px -10px var(--founder-primary)',
-            flexShrink: 0
-          }}>
-            <Brain size={40} />
-          </div>
-          <div>
-            <h2 className="heading" style={{ fontSize: 'clamp(1.75rem, 4vw, 2.75rem)', fontWeight: '900', color: 'white', letterSpacing: '-0.04em' }}>News Navigator</h2>
-            <p style={{ color: 'var(--text-muted)', fontWeight: '600', fontSize: '1.25rem' }}>AI-powered interactive intelligence briefings.</p>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 750px), 1fr))", gap: "3rem" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
+        <h2 className="heading" style={{ fontSize: "2.25rem", color: "white" }}>Intelligence Navigator</h2>
+        <div className="glass-panel" style={{ padding: "2rem", borderRadius: "2rem" }}>
+          <input 
+            value={searchTerm} 
+            onChange={(e) => setSearchTerm(e.target.value)} 
+            placeholder="Search signals..." 
+            style={{ width: "100%", padding: "1.25rem 2rem", borderRadius: "1rem", background: "rgba(255,255,255,0.05)", border: "none", color: "white" }} 
+          />
+          <div style={{ display: "flex", gap: "0.5rem", marginTop: "1rem" }}>
+            {categories.map(cat => (
+              <button key={cat} onClick={() => setActiveCategory(cat)} style={{ padding: "0.5rem 1rem", borderRadius: "0.5rem", background: activeCategory === cat ? "var(--primary)" : "none", color: "white", border: "1px solid var(--border-subtle)" }}>{cat}</button>
+            ))}
           </div>
         </div>
-        
-        <button 
-          onClick={handleSynthesize}
-          disabled={isSynthesizing}
-          style={{
-            padding: '1.25rem 2.5rem',
-            background: 'var(--founder-gradient)',
-            color: 'white',
-            border: 'none',
-            borderRadius: '1.25rem',
-            fontWeight: '900',
-            fontSize: '1.1rem',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '1rem',
-            boxShadow: 'var(--shadow-lg)',
-            transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-            width: 'auto'
-          }}
-        >
-          {isSynthesizing ? <Activity className="spin" size={24} /> : <Sparkles size={24} />}
-          {isSynthesizing ? 'SYNTHESIZING...' : 'START DEEP BROWSE'}
-        </button>
-      </div>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem', flex: 1 }}>
-        {/* Synthesis Status Area */}
-        <AnimatePresence mode="wait">
-          {isSynthesizing && (
-            <motion.div 
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              style={{ overflow: 'hidden' }}
-            >
-              <div className="glass-card" style={{ padding: '2.5rem', borderRadius: '2.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '1.5rem', background: 'rgba(255,255,255,0.02)' }}>
-                <div style={{ color: 'var(--founder-primary)', display: 'flex', justifyContent: 'center' }}>
-                  {React.createElement(synthSteps[synthStep].icon, { size: 64, className: "pulse" })}
-                </div>
-                <div>
-                   <h3 className="heading" style={{ color: 'white', fontSize: '2rem', fontWeight: '900', marginBottom: '0.5rem' }}>{synthSteps[synthStep].name}</h3>
-                   <p style={{ color: 'var(--text-muted)', fontSize: '1.25rem', fontWeight: '600' }}>{synthSteps[synthStep].detail}</p>
-                </div>
-                <div style={{ width: '100%', maxWidth: '400px', height: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', overflow: 'hidden' }}>
-                  <motion.div 
-                    initial={{ width: 0 }}
-                    animate={{ width: `${((synthStep + 1) / synthSteps.length) * 100}%` }}
-                    style={{ height: '100%', background: 'var(--founder-primary)', boxShadow: '0 0 15px var(--founder-primary)' }}
-                  />
-                </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: "1rem", maxHeight: "500px", overflowY: "auto" }}>
+          {filteredStories.map((s: any) => (
+            <div key={s.id} className="glass-card" style={{ padding: "1rem", display: "flex", gap: "1.25rem", alignItems: "center" }}>
+              <div style={{ flex: 1 }}>
+                <span style={{ fontSize: "0.6rem", color: "var(--primary)" }}>{(s.category || "Strategic").toUpperCase()}</span>
+                <h4 style={{ color: "white", fontSize: "0.95rem" }}>{s.title}</h4>
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Intelligence Briefing Document */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 450px), 1fr))', gap: '3rem', flex: 1 }}>
-          <div className="glass-card" style={{ padding: 'clamp(1.5rem, 3vw, 3rem)', borderRadius: '2.5rem', backgroundColor: 'rgba(255,255,255,0.01)' }}>
-             <h4 style={{ fontWeight: '900', color: 'white', fontSize: '1.25rem', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                <Zap size={20} className="text-primary" /> Integrated Summary
-             </h4>
-             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
-                <p style={{ fontSize: '1.25rem', lineHeight: '1.7', color: 'rgba(255,255,255,0.9)', fontWeight: '500' }}>
-                  {aiData ? aiData.summary : "Strategic indicators suggest a structural pivot in the semiconductor sector. Regional focus shifts from long-lead nodes to agile local manufacturing pods, driven by Q1 regulatory shifts."}
-                </p>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.25rem' }}>
-                    {(aiData ? aiData.impactVectors : [
-                      { icon: 'trending-up', label: "GDP Impact", value: "+2.4%" },
-                      { icon: 'globe', label: "Supply Risk", value: "Critical" },
-                      { icon: 'zap', label: "Tech Saturation", value: "Lo" }
-                    ]).map((m: any, i: number) => (
-                      <div key={i} className="glass-card" style={{ padding: '1rem 1.5rem', borderRadius: '1.25rem', backgroundColor: 'rgba(255,255,255,0.03)', display: 'flex', alignItems: 'center', gap: '1rem', border: '1px solid var(--border-subtle)', flex: '1 1 140px' }}>
-                        <div style={{ color: 'var(--primary)' }}>{getIcon(m.icon)}</div>
-                        <div>
-                           <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', fontWeight: '800' }}>{m.label}</div>
-                           <div style={{ fontSize: '1.1rem', fontWeight: '900', color: 'white' }}>{m.value}</div>
-                        </div>
-                      </div>
-                    ))}
-                </div>
-             </div>
-          </div>
-
-          <div className="glass-card" style={{ padding: 'clamp(1.5rem, 3vw, 3rem)', borderRadius: '2.5rem', backgroundColor: 'rgba(255,255,255,0.01)' }}>
-             <h4 style={{ fontWeight: '900', color: 'white', fontSize: '1.25rem', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                <Cpu size={20} className="text-primary" /> Intelligence Nodes
-             </h4>
-             <div className="grid-responsive" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                {stories.slice(0, 4).map((node, i) => (
-                   <motion.div 
-                     key={i} 
-                     whileHover={{ x: 8, backgroundColor: 'rgba(255,255,255,0.03)' }}
-                     style={{ 
-                       padding: '1.5rem', 
-                       backgroundColor: 'rgba(255,255,255,0.01)', 
-                       borderRadius: '1.5rem', 
-                       border: '1px solid var(--border-subtle)', 
-                       display: 'flex', 
-                       alignItems: 'center', 
-                       justifyContent: 'space-between',
-                       cursor: 'pointer'
-                     }}
-                   >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
-                        <CheckCircle2 size={24} style={{ color: '#10b981' }} />
-                        <span style={{ fontWeight: '800', color: 'white', fontSize: '1.1rem' }}>{node.title}</span>
-                      </div>
-                      <ChevronRight size={20} style={{ color: 'var(--text-dim)' }} />
-                   </motion.div>
-                ))}
-             </div>
-          </div>
+            </div>
+          ))}
         </div>
       </div>
-    </motion.div>
+      <div style={{ position: "sticky", top: 0, height: "fit-content" }}>
+        <div className="glass-panel" style={{ padding: "2rem", borderRadius: "2rem" }}>
+          <h3 className="heading" style={{ color: "white" }}>Aura Synthesis</h3>
+          {intelligenceReport ? (
+            <div style={{ marginTop: "1rem" }}><p style={{ color: "white", fontStyle: "italic", fontSize: "1rem" }}>{intelligenceReport.summary}</p><button onClick={() => setIntelligenceReport(null)} style={{ marginTop: "1rem", padding: "0.5rem", borderRadius: "0.5rem", border: "1px solid white", background: "none", color: "white" }}>Reset</button></div>
+          ) : (
+            <button onClick={handleSynthesize} style={{ background: "var(--primary)", marginTop: "1rem", padding: "1rem", borderRadius: "1rem", color: "white", width: "100%", border: "none" }}>{isSynthesizing ? "Synthesizing..." : "Synthesize"}</button>
+          )}
+        </div>
+      </div>
+    </div>
   );
 };
 

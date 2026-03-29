@@ -189,9 +189,15 @@ const HomeFeed: React.FC<HomeFeedProps> = ({ persona, stories, isLoading, error,
                 </div>
 
                 {isLoading ? (
-                    <div className="flex-center" style={{ padding: '5rem 0', flexDirection: 'column', gap: '1.5rem' }}>
-                        <Activity className="spin text-primary" size={48} />
-                        <span style={{ fontWeight: '900', letterSpacing: '0.1em', opacity: 0.5 }}>SYNCHRONIZING {activeCategory.toUpperCase()}...</span>
+                    <div className="flex-center" style={{ padding: '10rem 0', flexDirection: 'column', gap: '2rem' }}>
+                        <div style={{ position: 'relative' }}>
+                            <div className="pulse" style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.1)' }} />
+                            <Loader2 size={40} className="spin" style={{ position: 'absolute', top: 20, left: 20, color: 'var(--primary)' }} />
+                        </div>
+                        <div style={{ textAlign: 'center' }}>
+                            <p style={{ fontWeight: '900', letterSpacing: '0.2em', color: 'var(--primary)', marginBottom: '0.5rem' }}>AURA NEURAL ENRICHMENT ACTIVE</p>
+                            <p style={{ fontSize: '0.8rem', color: 'var(--text-dim)', fontWeight: '800' }}>ANALYZING GLOBAL HEADLINES FOR {persona.toUpperCase()} RELEVANCE...</p>
+                        </div>
                     </div>
                 ) : error ? (
                     <div className="glass-panel" style={{ padding: '3rem', borderRadius: '2rem', textAlign: 'center' }}>
@@ -227,6 +233,10 @@ const HomeFeed: React.FC<HomeFeedProps> = ({ persona, stories, isLoading, error,
                         </div>
 
                         <div style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span style={{ fontSize: '0.65rem', fontWeight: '900', color: 'var(--primary)', letterSpacing: '0.05em' }}>{story.category.toUpperCase()}</span>
+                                <span style={{ fontSize: '0.65rem', fontWeight: '800', color: 'var(--text-dim)' }}>{story.relevance}% RELEVANCE</span>
+                            </div>
                             <h3 style={{ fontSize: '1.15rem', fontWeight: '900', lineHeight: '1.25', color: 'white' }}>{story.title}</h3>
                             <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', lineHeight: '1.4', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', fontWeight: '500' }}>{story.description}</p>
                             
@@ -234,7 +244,16 @@ const HomeFeed: React.FC<HomeFeedProps> = ({ persona, stories, isLoading, error,
                                 <div style={{ color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: '900', fontSize: '0.75rem', letterSpacing: '0.05em' }}>
                                     DEEP ANALYSIS <ArrowUpRight size={14} />
                                 </div>
-                                <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: '800' }}>{story.relevance}% MATCH</div>
+                                <div style={{ 
+                                    padding: '0.2rem 0.5rem', 
+                                    borderRadius: '0.4rem', 
+                                    fontSize: '0.65rem', 
+                                    fontWeight: '900',
+                                    backgroundColor: story.sentiment === 'positive' ? 'rgba(16, 185, 129, 0.1)' : story.sentiment === 'warning' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(255,255,255,0.05)',
+                                    color: story.sentiment === 'positive' ? '#10b981' : story.sentiment === 'warning' ? '#ef4444' : 'var(--text-dim)'
+                                }}>
+                                    {story.sentiment.toUpperCase()}
+                                </div>
                             </div>
                         </div>
                         </motion.div>
