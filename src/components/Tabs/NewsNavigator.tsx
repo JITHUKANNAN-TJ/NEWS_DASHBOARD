@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { Story, Persona } from "../../types";
 import { synthesizeBriefing } from "../../services/aiService";
+import NeuralImage from "../Common/NeuralImage";
 
 interface NewsNavigatorProps {
   stories: Story[];
@@ -111,7 +112,11 @@ const NewsNavigator: React.FC<NewsNavigatorProps> = ({ stories = [], persona, on
                         style={{ padding: "1.5rem", display: "flex", gap: "1.5rem", alignItems: "center", background: "rgba(255,255,255,0.02)", border: "1px solid var(--border-subtle)", borderRadius: "1.75rem", cursor: "pointer" }}
                     >
                         <div style={{ width: "80px", height: "80px", borderRadius: "1.25rem", overflow: "hidden", flexShrink: 0 }}>
-                            <img src={story.urlToImage || 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=200&auto=format&fit=crop'} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                            <NeuralImage 
+                                src={story.urlToImage} 
+                                alt={story.title}
+                                style={{ width: "100%", height: "100%" }}
+                            />
                         </div>
                         <div style={{ flex: 1 }}>
                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.3rem" }}>

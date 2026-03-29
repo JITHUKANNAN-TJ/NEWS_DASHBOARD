@@ -9,6 +9,14 @@ export interface PersonaConfig {
   description: string;
 }
 
+export interface StoryAnalysis {
+  sentimentLabel: string;
+  sentimentDetail: string;
+  actionLabel: string;
+  actionDetail: string;
+  neuralBreakdown: string;
+}
+
 export interface Story {
   id: number;
   title: string;
@@ -20,6 +28,7 @@ export interface Story {
   source: {
     name: string;
   };
+  analysis?: StoryAnalysis;
 }
 
 export interface StoryArc {

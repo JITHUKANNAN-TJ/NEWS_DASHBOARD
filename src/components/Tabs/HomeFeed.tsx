@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { Story, Persona } from '../../types';
 import { synthesizeBriefing } from '../../services/aiService';
+import NeuralImage from '../Common/NeuralImage';
 
 interface HomeFeedProps {
   persona: Persona;
@@ -169,7 +170,7 @@ const HomeFeed: React.FC<HomeFeedProps> = ({ persona, stories, isLoading, error,
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 800px), 1fr))', gap: '3rem' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
         {/* Main Stream Area */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
             <section>
@@ -183,7 +184,7 @@ const HomeFeed: React.FC<HomeFeedProps> = ({ persona, stories, isLoading, error,
             <section style={{ flex: 1 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                        <div style={{ width: '4px', height: '1.5rem', background: 'var(--investor-primary)', borderRadius: '2px' }} />
+                        <div style={{ width: '4px', height: '1.5rem', background: 'var(--primary)', borderRadius: '2px' }} />
                         <h2 className="heading" style={{ fontSize: '1.5rem', fontWeight: '900', color: 'white' }}>{activeCategory} Intelligence</h2>
                     </div>
                 </div>
@@ -204,58 +205,55 @@ const HomeFeed: React.FC<HomeFeedProps> = ({ persona, stories, isLoading, error,
                         <p style={{ color: '#ef4444', fontWeight: '900' }}>{error}</p>
                     </div>
                 ) : (
-                    <div className="grid-responsive">
+                    <div className="grid-responsive" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '2rem' }}>
                     {filteredStories.map((story, i) => (
                         <motion.div
-                            key={i}
+                            key={story.id}
                             initial={{ opacity: 0, y: 15 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.08 * i }}
                             whileHover={{ y: -6 }}
                             onClick={() => onAnalyze(story)}
                             className="glass-card"
-                            style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', background: 'rgba(255,255,255,0.01)' }}
+                            style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: 'rgba(255,255,255,0.01)', border: '1px solid var(--border-subtle)', borderRadius: '2rem' }}
                         >
-                        <div style={{ height: '180px', width: '100%', position: 'relative', overflow: 'hidden' }}>
-                            <img src={story.urlToImage || `https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=800&auto=format&fit=crop`} alt={story.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                            
-                            <div style={{ position: 'absolute', top: '0.75rem', left: '0.75rem', display: 'flex', gap: '0.5rem' }}>
-                                <div style={{ padding: '0.3rem 0.6rem', background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', borderRadius: '0.5rem', color: 'white', fontSize: '0.65rem', fontWeight: '900', letterSpacing: '0.05em' }}>
-                                    {story.source.name.toUpperCase()}
+                            <div style={{ height: '200px', width: '100%', position: 'relative' }}>
+                                <NeuralImage 
+                                    src={story.urlToImage} 
+                                    alt={story.title}
+                                    style={{ width: '100%', height: '100%' }}
+                                />
+                                <div style={{ position: 'absolute', top: '1rem', left: '1rem', display: 'flex', gap: '0.5rem' }}>
+                                    <div style={{ padding: '0.4rem 0.8rem', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(10px)', borderRadius: '0.75rem', color: 'white', fontSize: '0.65rem', fontWeight: '900', letterSpacing: '0.05em' }}>
+                                        {story.source.name.toUpperCase()}
+                                    </div>
                                 </div>
                             </div>
 
-                            <div style={{ position: 'absolute', bottom: '0.75rem', right: '0.75rem' }}>
-                                <div style={{ padding: '0.4rem 0.8rem', background: 'var(--primary-gradient)', borderRadius: '0.75rem', color: 'white', fontSize: '0.65rem', fontWeight: '900', display: 'flex', alignItems: 'center', gap: '0.4rem', boxShadow: '0 10px 20px rgba(0,0,0,0.3)' }}>
-                                    <Play size={10} fill="white" /> AI SHORT
+                            <div style={{ padding: '1.75rem', flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <span style={{ fontSize: '0.7rem', fontWeight: '900', color: 'var(--primary)', letterSpacing: '0.05em' }}>{story.category.toUpperCase()}</span>
+                                    <span style={{ fontSize: '0.7rem', fontWeight: '800', color: 'var(--text-dim)' }}>{story.relevance}% RELEVANCE</span>
+                                </div>
+                                <h3 style={{ fontSize: '1.25rem', fontWeight: '900', lineHeight: '1.25', color: 'white' }}>{story.title}</h3>
+                                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: '1.5', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', fontWeight: '500' }}>{story.description}</p>
+                                
+                                <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                                    <div style={{ color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: '900', fontSize: '0.75rem', letterSpacing: '0.1em' }}>
+                                        DEEP ANALYSIS <ArrowUpRight size={14} />
+                                    </div>
+                                    <div style={{ 
+                                        padding: '0.3rem 0.6rem', 
+                                        borderRadius: '0.5rem', 
+                                        fontSize: '0.65rem', 
+                                        fontWeight: '900',
+                                        backgroundColor: story.sentiment === 'positive' ? 'rgba(16, 185, 129, 0.1)' : story.sentiment === 'warning' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(255,255,255,0.05)',
+                                        color: story.sentiment === 'positive' ? '#10b981' : story.sentiment === 'warning' ? '#ef4444' : 'var(--text-dim)'
+                                    }}>
+                                        {story.sentiment.toUpperCase()}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-
-                        <div style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <span style={{ fontSize: '0.65rem', fontWeight: '900', color: 'var(--primary)', letterSpacing: '0.05em' }}>{story.category.toUpperCase()}</span>
-                                <span style={{ fontSize: '0.65rem', fontWeight: '800', color: 'var(--text-dim)' }}>{story.relevance}% RELEVANCE</span>
-                            </div>
-                            <h3 style={{ fontSize: '1.15rem', fontWeight: '900', lineHeight: '1.25', color: 'white' }}>{story.title}</h3>
-                            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', lineHeight: '1.4', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', fontWeight: '500' }}>{story.description}</p>
-                            
-                            <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '0.75rem' }}>
-                                <div style={{ color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: '900', fontSize: '0.75rem', letterSpacing: '0.05em' }}>
-                                    DEEP ANALYSIS <ArrowUpRight size={14} />
-                                </div>
-                                <div style={{ 
-                                    padding: '0.2rem 0.5rem', 
-                                    borderRadius: '0.4rem', 
-                                    fontSize: '0.65rem', 
-                                    fontWeight: '900',
-                                    backgroundColor: story.sentiment === 'positive' ? 'rgba(16, 185, 129, 0.1)' : story.sentiment === 'warning' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(255,255,255,0.05)',
-                                    color: story.sentiment === 'positive' ? '#10b981' : story.sentiment === 'warning' ? '#ef4444' : 'var(--text-dim)'
-                                }}>
-                                    {story.sentiment.toUpperCase()}
-                                </div>
-                            </div>
-                        </div>
                         </motion.div>
                     ))}
                     </div>
@@ -306,9 +304,9 @@ const HomeFeed: React.FC<HomeFeedProps> = ({ persona, stories, isLoading, error,
                       </p>
                    </div>
                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
-                      {briefingData.impactVectors.map((v: any, i: number) => (
+                      {(briefingData.impactVectors || []).map((v: any, i: number) => (
                         <div key={i} className="glass-card" style={{ padding: '1.25rem', textAlign: 'center', border: '1px solid var(--border-subtle)' }}>
-                           <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', fontWeight: '900', marginBottom: '0.4rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{v.label}</div>
+                           <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', fontWeight: '900', marginBottom: '0.4rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{(v.label || "").toUpperCase()}</div>
                            <div style={{ fontSize: '1.35rem', fontWeight: '900', color: 'white' }}>{v.value}</div>
                         </div>
                       ))}

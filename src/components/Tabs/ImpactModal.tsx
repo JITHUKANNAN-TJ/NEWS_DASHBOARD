@@ -1,7 +1,8 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, TrendingUp, Zap, BarChart3, Info, ChevronRight, Activity, ShieldCheck, Brain } from 'lucide-react';
+import { X, TrendingUp, Zap, BarChart3, Info, ChevronRight, Activity, ShieldCheck, Brain, Target, Compass } from 'lucide-react';
 import { Story } from '../../types';
+import NeuralImage from '../Common/NeuralImage';
 
 interface ImpactModalProps {
   story: Story | null;
@@ -11,6 +12,17 @@ interface ImpactModalProps {
 
 const ImpactModal: React.FC<ImpactModalProps> = ({ story, isOpen, onClose }) => {
   if (!story) return null;
+
+  // Default analysis for stories that haven't been processed by Aura yet
+  const defaultAnalysis = {
+    sentimentLabel: story.sentiment === 'positive' ? 'BULLISH' : story.sentiment === 'warning' ? 'CAUTIOUS' : 'NEUTRAL',
+    sentimentDetail: "Aura is currently decrypting the market sentiment vector for this specific signal.",
+    actionLabel: "MONITOR",
+    actionDetail: "Active intelligence gathering in progress. Maintain current positions.",
+    neuralBreakdown: "Neural synchronization with 2026 tactical baseline is complete. High correlation with sector momentum detected."
+  };
+
+  const analysis = story.analysis || defaultAnalysis;
 
   return (
     <AnimatePresence>
@@ -80,60 +92,55 @@ const ImpactModal: React.FC<ImpactModalProps> = ({ story, isOpen, onClose }) => 
               </button>
             </div>
 
+            <NeuralImage 
+                src={story.urlToImage} 
+                alt={story.title}
+                style={{ width: '100%', height: '300px', borderRadius: '2.5rem', marginBottom: '2.5rem' }}
+            />
+
             <h2 className="heading" style={{ fontSize: 'clamp(1.75rem, 5vw, 3rem)', fontWeight: '900', lineHeight: '1.1', marginBottom: '3rem', color: 'white', letterSpacing: '-0.04em' }}>
               {story.title}
             </h2>
 
-            {/* Analysis Grid */}
+            {/* Dynamic Analysis Grid */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))', gap: '2rem', marginBottom: '3.5rem' }}>
               <div className="glass-panel" style={{ padding: '2.5rem', borderRadius: '2.5rem', border: '1px solid var(--border-subtle)', background: 'rgba(255,255,255,0.01)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', color: 'var(--primary)' }}>
-                  <Activity size={20} />
+                  <TrendingUp size={20} />
                   <span style={{ fontSize: '0.8rem', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Market Sentiment</span>
                 </div>
                 <div style={{ fontSize: '2.25rem', fontWeight: '900', marginBottom: '0.75rem', color: 'white' }}>
-                  {story.sentiment === 'positive' ? 'BULLISH' : story.sentiment === 'warning' ? 'CAUTIOUS' : 'NEUTRAL'}
+                  {analysis.sentimentLabel}
                 </div>
                 <p style={{ fontSize: '1.05rem', color: 'var(--text-muted)', lineHeight: '1.6', fontWeight: '500' }}>
-                  Aura signals high accumulation in adjacent sectors. Volatility indicators remain indexed at 2.4.
+                  {analysis.sentimentDetail}
                 </p>
               </div>
 
               <div className="glass-panel" style={{ padding: '2.5rem', borderRadius: '2.5rem', border: '1px solid var(--border-subtle)', background: 'rgba(255,255,255,0.01)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', color: 'var(--investor-primary)' }}>
-                  <Zap size={20} />
+                  <Target size={20} />
                   <span style={{ fontSize: '0.8rem', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Action Score</span>
                 </div>
                 <div style={{ fontSize: '2.25rem', fontWeight: '900', marginBottom: '0.75rem', color: 'white' }}>
-                  CRITICAL
+                  {analysis.actionLabel}
                 </div>
                 <p style={{ fontSize: '1.05rem', color: 'var(--text-muted)', lineHeight: '1.6', fontWeight: '500' }}>
-                  Recommended positional adjustment across core weights. Risk threshold is currently within sync limits.
+                  {analysis.actionDetail}
                 </p>
               </div>
             </div>
 
-            {/* Neural Summary Section */}
+            {/* Neural Breakdown Section */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
               <h3 className="heading" style={{ fontSize: '1.5rem', fontWeight: '900', display: 'flex', alignItems: 'center', gap: '1rem', color: 'white' }}>
-                <Brain size={28} style={{ color: 'var(--primary)' }} /> Neural Component Breakdown
+                <Brain size={28} style={{ color: 'var(--primary)' }} /> Aura Neural Breakdown
               </h3>
               <div style={{ backgroundColor: 'rgba(255,255,255,0.02)', padding: '2.5rem', borderRadius: '2.5rem', border: '1px solid var(--border-subtle)' }}>
                 <p style={{ color: 'rgba(255,255,255,0.9)', lineHeight: '1.8', fontStyle: 'italic', fontSize: '1.15rem', fontWeight: '500' }}>
-                  "Targeting 12 macro-indicators, our Aura AI identifies a significant shift in capital flow following this announcement. Sector-level technicals show accumulation patterns above support levels. Correlation with historical Q3 trends is 87%."
+                  "{analysis.neuralBreakdown}"
                 </p>
               </div>
-            </div>
-
-            {/* Contrarian View Overlay */}
-            <div style={{ marginTop: '2rem', padding: '1.5rem', borderRadius: '1.5rem', backgroundColor: 'rgba(239, 68, 68, 0.05)', border: '1px solid rgba(239, 68, 68, 0.1)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem', color: '#ef4444' }}>
-                    <Info size={16} />
-                    <span style={{ fontWeight: '900', fontSize: '0.75rem', letterSpacing: '0.05em' }}>CONTRARIAN PERSPECTIVE SURFACED</span>
-                </div>
-                <p style={{ fontSize: '0.95rem', color: 'rgba(239, 68, 68, 0.8)', fontWeight: '600' }}>
-                    Institutional volume may mask a short-term liquidity trap. Proceed with caution on derivative positions.
-                </p>
             </div>
 
             <div style={{ marginTop: '3.5rem' }}>
@@ -158,7 +165,7 @@ const ImpactModal: React.FC<ImpactModalProps> = ({ story, isOpen, onClose }) => 
                   transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
                 }}
               >
-                ACTIVATE DEEP ANALYSIS <ChevronRight size={24} />
+                ACTIVATE FULL TRADING NODE <ChevronRight size={24} />
               </button>
             </div>
           </motion.div>
